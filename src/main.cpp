@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "LED_PIN.h"
+#include "TimeInterval.h"
 
 #define HIGH_STATE 1
 
@@ -15,6 +16,8 @@ int hour = 3;
 int minute = 34;
 
 int switch_mh = 0;
+
+TimeInterval timer = TimeInterval(1000, 0, true);
 
 void setup()
 {
@@ -44,9 +47,8 @@ void setup()
 void loop()
 {
 
-  if (millis() - last_time > 1000)
+  if (timer.marked())
   {
-    last_time = millis();
     minute++;
 
     if (minute == 60)
@@ -70,14 +72,6 @@ void loop()
   // {
   //   emit_hour(hour);
   // }
-
-  if (millis() - switch_mh >= 2000)
-  {
-    switch_mh = millis();
-    flag = !flag;
-  }
-
-  delay(10);
 }
 
 void emit_hour(int num)
@@ -115,7 +109,8 @@ void emit_num(int sector, int num)
 {
   if (sector == 0)
   {
-    digitalWrite(SOURCE_LED.A, LOW);
+    analogWrite(SOURCE_LED.A, 175);
+    // digitalWrite(SOURCE_LED.A, LOW);
     digitalWrite(SOURCE_LED.B, HIGH);
   }
   else if (sector == 1)

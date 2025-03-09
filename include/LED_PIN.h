@@ -10,7 +10,7 @@ struct LED_PIN_DATA_T
   int C = A5;
   int D = 6;
   int E = 7;
-  int F = 10;
+  int F = 20;
   int G = 9;
 };
 
