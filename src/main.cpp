@@ -1,200 +1,137 @@
 #include <Arduino.h>
-#include "LED_PIN.h"
-#include "TimeInterval.h"
+#include <TimeInterval.h>
 
-#define HIGH_STATE 1
+#include <WiFi.h>
+#include <HTTPClient.h>
+#include <ArduinoJson.h> // Install from Library Manager
 
-void _emit(int a, int b, int c, int d, int e, int f, int g);
-void emit_num(int sector, int num);
-void emit_hour(int num);
-void emit_minute(int num);
+void fetchAndParseJson();
 
-bool flag = false;
+const char *ssid = "Alien";
+const char *password = "Wahahaha";
+const char *serverUrl = "https://timeapi.io/api/time/current/zone?timeZone=UTC"; // Example: http://example.com/data.json
 
-int last_time = 0;
-int hour = 3;
-int minute = 34;
+unsigned long wifiOnInterval = 120000; // 1 hour (3600000 milliseconds)
+unsigned long wifiOnDuration = 120000; // 2 minutes (120000 milliseconds)
 
-int switch_mh = 0;
-
-TimeInterval timer = TimeInterval(1000, 0, true);
+unsigned long previousMillis = 0;
+bool wifiEnabled = false;
+unsigned long wifiStartTime = 0;
 
 void setup()
 {
-  pinMode(LED_PIN.A, OUTPUT);
-  pinMode(LED_PIN.B, OUTPUT);
-  pinMode(LED_PIN.C, OUTPUT);
-  pinMode(LED_PIN.D, OUTPUT);
-  pinMode(LED_PIN.E, OUTPUT);
-  pinMode(LED_PIN.F, OUTPUT);
-  pinMode(LED_PIN.G, OUTPUT);
+  Serial.begin(115200);
 
-  pinMode(SOURCE_LED.A, OUTPUT);
-  pinMode(SOURCE_LED.B, OUTPUT);
+  while (!Serial)
+    ;
 
-  digitalWrite(SOURCE_LED.A, LOW);
-  digitalWrite(SOURCE_LED.B, LOW);
-
-  digitalWrite(LED_PIN.A, HIGH);
-  digitalWrite(LED_PIN.B, HIGH);
-  digitalWrite(LED_PIN.C, HIGH);
-  digitalWrite(LED_PIN.D, HIGH);
-  digitalWrite(LED_PIN.E, HIGH);
-  digitalWrite(LED_PIN.F, HIGH);
-  digitalWrite(LED_PIN.G, HIGH);
+  WiFi.mode(WIFI_OFF);
+  Serial.println("Wi-Fi initially off.");
 }
 
 void loop()
 {
+  unsigned long currentMillis = millis();
 
-  if (timer.marked())
+  if (wifiEnabled)
   {
-    minute++;
-
-    if (minute == 60)
+    if (currentMillis - wifiStartTime >= wifiOnDuration)
     {
-      minute = 0;
-      hour++;
+      WiFi.disconnect(true);
+      WiFi.mode(WIFI_OFF);
+      wifiEnabled = false;
+      Serial.println("Wi-Fi off.");
+      previousMillis = currentMillis;
     }
-
-    if (hour == 24)
-    {
-      hour = 0;
-    }
-  }
-
-  emit_minute(minute);
-
-  // if (flag)
-  // {
-  // }
-  // else
-  // {
-  //   emit_hour(hour);
-  // }
-}
-
-void emit_hour(int num)
-{
-  // digitalWrite(LED_MH, HIGH);
-
-  emit_num(0, num / 10);
-  delay(10);
-  emit_num(1, num % 10);
-  delay(10);
-}
-
-void emit_minute(int num)
-{
-  // digitalWrite(LED_MH, LOW);
-
-  emit_num(0, num % 10);
-  // delay(10);
-  // emit_num(1, num % 10);
-  // delay(10);
-}
-
-int flip(int a)
-{
-
-  return a == 0 ? 1 : 0;
-}
-
-/**
- * @brief enter a number between 0 - 9
- *
- * @param num
- */
-void emit_num(int sector, int num)
-{
-  if (sector == 0)
-  {
-    analogWrite(SOURCE_LED.A, 175);
-    // digitalWrite(SOURCE_LED.A, LOW);
-    digitalWrite(SOURCE_LED.B, HIGH);
-  }
-  else if (sector == 1)
-  {
-    digitalWrite(SOURCE_LED.A, HIGH);
-    digitalWrite(SOURCE_LED.B, LOW);
   }
   else
   {
+    if (currentMillis - previousMillis >= wifiOnInterval)
+    {
+      WiFi.mode(WIFI_STA);
+      WiFi.begin(ssid, password);
+      Serial.print("Connecting to Wi-Fi...");
+      int attempts = 0;
+      while (WiFi.status() != WL_CONNECTED && attempts < 20)
+      {
+        delay(500);
+        Serial.print(".");
+        attempts++;
+      }
+
+      if (WiFi.status() == WL_CONNECTED)
+      {
+        Serial.println("\nWi-Fi connected!");
+        wifiEnabled = true;
+        wifiStartTime = currentMillis;
+        fetchAndParseJson(); // Fetch and parse JSON data
+      }
+      else
+      {
+        Serial.println("\nWi-Fi connection failed.");
+        WiFi.disconnect(true);
+        WiFi.mode(WIFI_OFF);
+        previousMillis = currentMillis;
+      }
+    }
   }
-
-  int h = HIGH_STATE;
-  int l = HIGH_STATE == 1 ? 0 : 1;
-
-  switch (num)
-  {
-  case 1:
-    // 1 = 2, 3
-    _emit(l, l, h, h, l, l, l);
-    break;
-
-  case 2:
-    // 2 = 1, 2, 4, 5, 6
-    _emit(l, h, h, l, h, h, h);
-    break;
-
-  case 3:
-    // 3 = 1, 2, 3, 4, 6
-
-    _emit(l, h, h, h, h, l, h);
-    break;
-
-  case 4:
-    // 4 = 0, 2, 3, 6
-
-    _emit(h, l, h, h, l, l, h);
-    break;
-
-  case 5:
-    // 5 = 0, 1, 3, 4, 6
-
-    _emit(h, h, l, h, h, l, h);
-    break;
-
-  case 6:
-    // 6 = 0, 1, 3, 4, 5, 6
-
-    _emit(h, h, l, h, h, h, h);
-    break;
-
-  case 7:
-    // 7 = 1, 2, 3
-    _emit(l, h, h, h, l, l, l);
-    break;
-
-  case 8:
-    // 8 = -all
-    _emit(h, h, h, h, h, h, h);
-    break;
-
-  case 9:
-    // 9 = 0, 1, 2, 3, 4, 6
-    _emit(h, h, h, h, h, l, h);
-    break;
-
-  case 0:
-    // 0 = -all, except 6
-    _emit(h, h, h, h, h, h, l);
-    break;
-
-  default:
-    _emit(l, l, l, l, l, l, l);
-    break;
-  }
+  delay(1000);
 }
 
-void _emit(int a, int b, int c, int d, int e, int f, int g)
+void fetchAndParseJson()
 {
+  HTTPClient http;
+  http.begin(serverUrl);
+  int httpCode = http.GET();
 
-  digitalWrite(LED_PIN.A, a);
-  digitalWrite(LED_PIN.B, b);
-  digitalWrite(LED_PIN.C, c);
-  digitalWrite(LED_PIN.D, d);
-  digitalWrite(LED_PIN.E, e);
-  digitalWrite(LED_PIN.F, f);
-  digitalWrite(LED_PIN.G, g);
+  if (httpCode > 0)
+  {
+    if (httpCode == HTTP_CODE_OK)
+    {
+      String payload = http.getString();
+      Serial.println("JSON Payload:");
+      Serial.println(payload);
+
+      DynamicJsonDocument doc(2048); // Adjust size as needed
+      DeserializationError error = deserializeJson(doc, payload);
+
+      if (error)
+      {
+        Serial.print("JSON parsing failed: ");
+        Serial.println(error.c_str());
+        return;
+      }
+
+      JsonObject obj = doc.as<JsonObject>();
+      for (JsonPair pair : obj)
+      {
+
+        Serial.print(pair.key().c_str());
+        // if (pair.value().isString())
+        // {
+        //   Serial.print("Key: ");
+        //   Serial.print(pair.key().c_str());
+        //   Serial.print(", Value (String): ");
+        //   Serial.println(pair.value().as<String>());
+        // }
+        // else if (pair.value().isNumber())
+        // {
+        //   Serial.print("Key: ");
+        //   Serial.print(pair.key().c_str());
+        //   Serial.print(", Value (Number): ");
+        //   Serial.println(pair.value().as<int>());
+        // }
+      }
+    }
+    else
+    {
+      Serial.printf("HTTP GET failed, code: %d\n", httpCode);
+    }
+  }
+  else
+  {
+    Serial.println("HTTP GET failed, connection error");
+  }
+
+  http.end();
 }
