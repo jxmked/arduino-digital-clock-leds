@@ -1,22 +1,59 @@
 #include <Arduino.h>
 #include <TimeInterval.h>
+#include <WiFi.h>
+#include <esp_wifi.h>
+
+char ssid[] = "Louqui";
+char pass[] = "Azerty123";
+char hostname[] = "digital-clock";
+
+uint8_t macaddress[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
+
+// WiFiClient client;
+
+// void setup()
+// {
+//   Serial.begin(115200);
+
+//   while (!Serial)
+//     ;
+
+//   WiFi.mode(WIFI_OFF);
+//   esp_base_mac_addr_set(macaddress);
+
+//   WiFi.setTxPower(WIFI_POWER_19_5dBm);
+//   WiFi.setHostname(hostname);
+
+//   delay(1000);
+
+//   WiFi.begin(ssid, pass);
+
+//   delay(2000);
+
+//   Serial.println("Attempting to connect to WPA network...");
+
+//   while (WiFi.status() != WL_CONNECTED)
+//   {
+//     Serial.println("Trying to connect");
+//     delay(500);
+//   }
+//   Serial.println("Connected");
+// }
 
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <ArduinoJson.h> // Install from Library Manager
 
-void fetchAndParseJson();
-
-const char *ssid = "Alien";
-const char *password = "Wahahaha";
 const char *serverUrl = "https://timeapi.io/api/time/current/zone?timeZone=UTC"; // Example: http://example.com/data.json
 
-unsigned long wifiOnInterval = 120000; // 1 hour (3600000 milliseconds)
-unsigned long wifiOnDuration = 120000; // 2 minutes (120000 milliseconds)
+unsigned long wifiOnInterval = 30000; // 1 hour (3600000 milliseconds)
+unsigned long wifiOnDuration = 30000; // 2 minutes (120000 milliseconds)
 
 unsigned long previousMillis = 0;
-bool wifiEnabled = false;
+bool wifiEnabled = true;
 unsigned long wifiStartTime = 0;
+
+void fetchAndParseJson();
 
 void setup()
 {
@@ -26,6 +63,13 @@ void setup()
     ;
 
   WiFi.mode(WIFI_OFF);
+  esp_base_mac_addr_set(macaddress);
+
+  WiFi.setTxPower(WIFI_POWER_19_5dBm);
+  WiFi.setHostname(hostname);
+
+  delay(1000);
+
   Serial.println("Wi-Fi initially off.");
 }
 
@@ -49,9 +93,10 @@ void loop()
     if (currentMillis - previousMillis >= wifiOnInterval)
     {
       WiFi.mode(WIFI_STA);
-      WiFi.begin(ssid, password);
+      WiFi.begin(ssid, pass);
       Serial.print("Connecting to Wi-Fi...");
       int attempts = 0;
+
       while (WiFi.status() != WL_CONNECTED && attempts < 20)
       {
         delay(500);
@@ -105,8 +150,7 @@ void fetchAndParseJson()
       JsonObject obj = doc.as<JsonObject>();
       for (JsonPair pair : obj)
       {
-
-        Serial.print(pair.key().c_str());
+        Serial.println(pair.key().c_str());
         // if (pair.value().isString())
         // {
         //   Serial.print("Key: ");
