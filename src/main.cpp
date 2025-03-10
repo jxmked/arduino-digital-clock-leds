@@ -2,47 +2,14 @@
 #include <TimeInterval.h>
 #include <WiFi.h>
 #include <esp_wifi.h>
+#include <ArduinoJson.h> // Install from Library Manager
+#include <HTTPClient.h>
 
 char ssid[] = "Louqui";
 char pass[] = "Azerty123";
 char hostname[] = "digital-clock";
 
 uint8_t macaddress[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
-
-// WiFiClient client;
-
-// void setup()
-// {
-//   Serial.begin(115200);
-
-//   while (!Serial)
-//     ;
-
-//   WiFi.mode(WIFI_OFF);
-//   esp_base_mac_addr_set(macaddress);
-
-//   WiFi.setTxPower(WIFI_POWER_19_5dBm);
-//   WiFi.setHostname(hostname);
-
-//   delay(1000);
-
-//   WiFi.begin(ssid, pass);
-
-//   delay(2000);
-
-//   Serial.println("Attempting to connect to WPA network...");
-
-//   while (WiFi.status() != WL_CONNECTED)
-//   {
-//     Serial.println("Trying to connect");
-//     delay(500);
-//   }
-//   Serial.println("Connected");
-// }
-
-#include <WiFi.h>
-#include <HTTPClient.h>
-#include <ArduinoJson.h> // Install from Library Manager
 
 const char *serverUrl = "https://timeapi.io/api/time/current/zone?timeZone=UTC"; // Example: http://example.com/data.json
 
