@@ -89,7 +89,7 @@ void emit_led(int seg, int index) {
 }
 
 /**
- * index = start from sun = 0
+ * index = start from sunday = 0
  */
 void emit_week(int index) {
   pinMode(SOURCE_LED.A, INPUT);
@@ -104,6 +104,13 @@ void emit_week(int index) {
   _emit_s_led(index, HIGH);
 }
 
+/**
+ * led 0,1 are each colon
+ * 
+ * led 2 are the am/pm indicator
+ * 
+ * @param index 
+ */
 void emit_util(int index) {
   pinMode(SOURCE_LED.A, INPUT);
   pinMode(SOURCE_LED.B, INPUT);
