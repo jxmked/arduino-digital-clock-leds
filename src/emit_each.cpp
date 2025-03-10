@@ -11,7 +11,7 @@ void emit_each_setup() {
   pinMode(LED_PIN.G, OUTPUT);
 }
 
-void _set_led_data(int value) {
+void _set_all_led_data(int value) {
   digitalWrite(LED_PIN.A, value);
   digitalWrite(LED_PIN.B, value);
   digitalWrite(LED_PIN.C, value);
@@ -19,6 +19,41 @@ void _set_led_data(int value) {
   digitalWrite(LED_PIN.E, value);
   digitalWrite(LED_PIN.F, value);
   digitalWrite(LED_PIN.G, value);
+}
+
+void _emit_s_led(int index, int mode) {
+  switch (index) {
+    case 0:
+      digitalWrite(LED_PIN.A, mode);
+      break;
+
+    case 1:
+      digitalWrite(LED_PIN.B, mode);
+      break;
+
+    case 2:
+      digitalWrite(LED_PIN.C, mode);
+      break;
+
+    case 3:
+      digitalWrite(LED_PIN.D, mode);
+      break;
+
+    case 4:
+      digitalWrite(LED_PIN.E, mode);
+      break;
+
+    case 5:
+      digitalWrite(LED_PIN.F, mode);
+      break;
+
+    case 6:
+      digitalWrite(LED_PIN.G, mode);
+      break;
+
+    default:
+      break;
+  }
 }
 
 void emit_led(int seg, int index) {
@@ -31,70 +66,52 @@ void emit_led(int seg, int index) {
     pinMode(SOURCE_LED.B, INPUT);
 
     digitalWrite(SOURCE_LED.A, LOW);
-    digitalWrite(index, HIGH);
+    _emit_s_led(index, HIGH);
 
   } else if (seg == 1) {
     pinMode(SOURCE_LED.B, INPUT);
 
     digitalWrite(SOURCE_LED.A, HIGH);
-    digitalWrite(index, LOW);
+    _emit_s_led(index, LOW);
 
   } else if (seg == 2) {
     pinMode(SOURCE_LED.A, INPUT);
 
     digitalWrite(SOURCE_LED.B, LOW);
-    digitalWrite(index, HIGH);
+    _emit_s_led(index, HIGH);
 
   } else if (seg == 3) {
     pinMode(SOURCE_LED.A, INPUT);
 
-    digitalWrite(SOURCE_LED.B, LOW);
-    digitalWrite(index, HIGH);
+    digitalWrite(SOURCE_LED.B, HIGH);
+    _emit_s_led(index, LOW);
   }
 }
 
 /**
  * index = start from sun = 0
- *
  */
 void emit_week(int index) {
   pinMode(SOURCE_LED.A, INPUT);
   pinMode(SOURCE_LED.B, INPUT);
   pinMode(SOURCE_LED.D, INPUT);
-  pinMode(SOURCE_LED.C, LOW);
+  pinMode(SOURCE_LED.C, OUTPUT);
 
-  _set_led_data(LOW);
+  digitalWrite(SOURCE_LED.C, LOW);
 
-  switch (index) {
-    case 0:
-      digitalWrite(LED_PIN.A, HIGH);
-      break;
+  _set_all_led_data(LOW);
 
-    case 1:
-      digitalWrite(LED_PIN.B, HIGH);
-      break;
+  _emit_s_led(index, HIGH);
+}
 
-    case 2:
-      digitalWrite(LED_PIN.C, HIGH);
-      break;
+void emit_util(int index) {
+  pinMode(SOURCE_LED.A, INPUT);
+  pinMode(SOURCE_LED.B, INPUT);
+  pinMode(SOURCE_LED.C, INPUT);
+  pinMode(SOURCE_LED.D, OUTPUT);
 
-    case 3:
-      digitalWrite(LED_PIN.D, HIGH);
-      break;
+  digitalWrite(SOURCE_LED.D, LOW);
 
-    case 4:
-      digitalWrite(LED_PIN.E, HIGH);
-      break;
-
-    case 5:
-      digitalWrite(LED_PIN.F, HIGH);
-      break;
-
-    case 6:
-      digitalWrite(LED_PIN.G, HIGH);
-      break;
-
-    default:
-      break;
-  }
+  _set_all_led_data(LOW);
+  _emit_s_led(index, HIGH);
 }
