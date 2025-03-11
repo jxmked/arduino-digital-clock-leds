@@ -56,11 +56,9 @@ void _emit_s_led(int index, int mode) {
     default:
       break;
   }
-
-  delay(1);
 }
 
-void _emit_arr_led(int pins[7], int count, uint8_t state) {
+void _emit_arr_led(const int pins[7], int count, uint8_t state) {
   for (int i = 0; i < count; i++) {
     _emit_s_led(pins[i], state);
   }
@@ -104,54 +102,54 @@ void emit_num(int seg, int num) {
   _set_all_led_data(_M);
   switch (num) {
     case 0: {
-      int to_emit[7] = {0, 1, 2, 3, 4, 5};
+      const int to_emit[7] = {0, 1, 2, 3, 4, 5};
       _emit_arr_led(to_emit, 6, _H);
     } break;
 
     case 1: {
-      int to_emit[7] = {2, 3};
+      const int to_emit[7] = {2, 3};
       _emit_arr_led(to_emit, 2, _H);
     } break;
 
     case 2: {
-      int to_emit[7] = {1, 2, 4, 5, 6};
+      const int to_emit[7] = {1, 2, 4, 5, 6};
       _emit_arr_led(to_emit, 5, _H);
     } break;
 
     case 3: {
-      int to_emit[7] = {1, 2, 3, 4, 6};
+      const int to_emit[7] = {1, 2, 3, 4, 6};
       _emit_arr_led(to_emit, 5, _H);
     } break;
 
     case 4: {
-      int to_emit[7] = {0, 2, 3, 6};
+      const int to_emit[7] = {0, 2, 3, 6};
       _emit_arr_led(to_emit, 4, _H);
     } break;
 
     case 5: {
-      int to_emit[7] = {0, 1, 3, 4, 6};
+      const int to_emit[7] = {0, 1, 3, 4, 6};
       _emit_arr_led(to_emit, 5, _H);
     } break;
 
     case 6: {
-      int to_emit[7] = {0, 1, 3, 4, 5, 6};
+      const int to_emit[7] = {0, 1, 3, 4, 5, 6};
       _emit_arr_led(to_emit, 6, _H);
     } break;
 
     case 7: {
-      int to_emit[7] = {1, 2, 3};
+      const int to_emit[7] = {1, 2, 3};
       _emit_arr_led(to_emit, 3, _H);
     } break;
 
     case 8: {
-      int to_emit[7] = {
+      const int to_emit[7] = {
           0, 1, 2, 3, 4, 5, 6,
       };
       _emit_arr_led(to_emit, 7, _H);
     } break;
 
     case 9: {
-      int to_emit[7] = {0, 1, 2, 3, 4, 6};
+      const int to_emit[7] = {0, 1, 2, 3, 4, 6};
       _emit_arr_led(to_emit, 6, _H);
     } break;
 
