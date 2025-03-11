@@ -1,6 +1,5 @@
-
-
 #include <Arduino.h>
+#include <DEFINITION.h>
 
 #include "LED_PIN.h"
 
@@ -57,6 +56,8 @@ void _emit_s_led(int index, int mode) {
     default:
       break;
   }
+
+  delay(1);
 }
 
 void _emit_arr_led(int pins[7], int count, uint8_t state) {
@@ -66,125 +67,135 @@ void _emit_arr_led(int pins[7], int count, uint8_t state) {
 }
 
 void emit_num(int seg, int num) {
-  uint8_t H = HIGH;
-  uint8_t L = LOW;
+  uint8_t _H = H;
+  uint8_t _M = L;
 
-  pinMode(SOURCE_LED.A, OUTPUT);
-  pinMode(SOURCE_LED.B, OUTPUT);
   pinMode(SOURCE_LED.C, INPUT);
   pinMode(SOURCE_LED.D, INPUT);
 
   if (seg == 0) {
+    pinMode(SOURCE_LED.A, OUTPUT);
     pinMode(SOURCE_LED.B, INPUT);
-    digitalWrite(SOURCE_LED.A, L);
+    digitalWrite(SOURCE_LED.A, _M);
 
   } else if (seg == 1) {
+    pinMode(SOURCE_LED.A, OUTPUT);
     pinMode(SOURCE_LED.B, INPUT);
-    digitalWrite(SOURCE_LED.A, H);
+    digitalWrite(SOURCE_LED.A, _H);
 
-    H = LOW;
-    L = HIGH;
+    _H = L;
+    _M = H;
   } else if (seg == 2) {
     pinMode(SOURCE_LED.A, INPUT);
-    digitalWrite(SOURCE_LED.B, L);
+    pinMode(SOURCE_LED.B, OUTPUT);
+
+    digitalWrite(SOURCE_LED.B, _M);
 
   } else if (seg == 3) {
     pinMode(SOURCE_LED.A, INPUT);
+    pinMode(SOURCE_LED.B, OUTPUT);
+
     digitalWrite(SOURCE_LED.B, H);
 
-    H = LOW;
-    L = HIGH;
+    _H = L;
+    _M = H;
   }
 
-  _set_all_led_data(L);
+  _set_all_led_data(_M);
   switch (num) {
     case 0: {
       int to_emit[7] = {0, 1, 2, 3, 4, 5};
-      _emit_arr_led(to_emit, 6, H);
+      _emit_arr_led(to_emit, 6, _H);
     } break;
 
     case 1: {
       int to_emit[7] = {2, 3};
-      _emit_arr_led(to_emit, 2, H);
+      _emit_arr_led(to_emit, 2, _H);
     } break;
 
     case 2: {
       int to_emit[7] = {1, 2, 4, 5, 6};
-      _emit_arr_led(to_emit, 5, H);
+      _emit_arr_led(to_emit, 5, _H);
     } break;
 
     case 3: {
       int to_emit[7] = {1, 2, 3, 4, 6};
-      _emit_arr_led(to_emit, 5, H);
+      _emit_arr_led(to_emit, 5, _H);
     } break;
 
     case 4: {
       int to_emit[7] = {0, 2, 3, 6};
-      _emit_arr_led(to_emit, 4, H);
+      _emit_arr_led(to_emit, 4, _H);
     } break;
 
     case 5: {
       int to_emit[7] = {0, 1, 3, 4, 6};
-      _emit_arr_led(to_emit, 5, H);
+      _emit_arr_led(to_emit, 5, _H);
     } break;
 
     case 6: {
       int to_emit[7] = {0, 1, 3, 4, 5, 6};
-      _emit_arr_led(to_emit, 6, H);
+      _emit_arr_led(to_emit, 6, _H);
     } break;
 
     case 7: {
       int to_emit[7] = {1, 2, 3};
-      _emit_arr_led(to_emit, 3, H);
+      _emit_arr_led(to_emit, 3, _H);
     } break;
 
     case 8: {
       int to_emit[7] = {
           0, 1, 2, 3, 4, 5, 6,
       };
-      _emit_arr_led(to_emit, 7, H);
+      _emit_arr_led(to_emit, 7, _H);
     } break;
 
     case 9: {
       int to_emit[7] = {0, 1, 2, 3, 4, 6};
-      _emit_arr_led(to_emit, 6, H);
+      _emit_arr_led(to_emit, 6, _H);
     } break;
 
     default:
       break;
   }
+
+  delay(1);
 }
 
 void emit_led(int seg, int index) {
-  pinMode(SOURCE_LED.A, OUTPUT);
-  pinMode(SOURCE_LED.B, OUTPUT);
   pinMode(SOURCE_LED.C, INPUT);
   pinMode(SOURCE_LED.D, INPUT);
 
   if (seg == 0) {
+    pinMode(SOURCE_LED.A, OUTPUT);
     pinMode(SOURCE_LED.B, INPUT);
 
-    digitalWrite(SOURCE_LED.A, LOW);
-    _emit_s_led(index, HIGH);
+    digitalWrite(SOURCE_LED.A, L);
+    _emit_s_led(index, H);
 
   } else if (seg == 1) {
+    pinMode(SOURCE_LED.A, OUTPUT);
     pinMode(SOURCE_LED.B, INPUT);
 
-    digitalWrite(SOURCE_LED.A, HIGH);
-    _emit_s_led(index, LOW);
+    digitalWrite(SOURCE_LED.A, H);
+    _emit_s_led(index, L);
 
   } else if (seg == 2) {
     pinMode(SOURCE_LED.A, INPUT);
+    pinMode(SOURCE_LED.B, OUTPUT);
 
-    digitalWrite(SOURCE_LED.B, LOW);
-    _emit_s_led(index, HIGH);
+    digitalWrite(SOURCE_LED.B, L);
+    _emit_s_led(index, H);
 
   } else if (seg == 3) {
     pinMode(SOURCE_LED.A, INPUT);
+    pinMode(SOURCE_LED.B, OUTPUT);
 
-    digitalWrite(SOURCE_LED.B, HIGH);
-    _emit_s_led(index, LOW);
+    digitalWrite(SOURCE_LED.B, H);
+    _emit_s_led(index, L);
   }
+
+  delay(1);
 }
 
 /**
@@ -196,11 +207,13 @@ void emit_week(int index) {
   pinMode(SOURCE_LED.D, INPUT);
   pinMode(SOURCE_LED.C, OUTPUT);
 
-  digitalWrite(SOURCE_LED.C, LOW);
+  digitalWrite(SOURCE_LED.C, L);
 
-  _set_all_led_data(LOW);
+  _set_all_led_data(L);
 
-  _emit_s_led(index, HIGH);
+  _emit_s_led(index, H);
+
+  delay(1);
 }
 
 /**
@@ -216,8 +229,10 @@ void emit_util(int index) {
   pinMode(SOURCE_LED.C, INPUT);
   pinMode(SOURCE_LED.D, OUTPUT);
 
-  digitalWrite(SOURCE_LED.D, LOW);
+  digitalWrite(SOURCE_LED.D, L);
 
-  _set_all_led_data(LOW);
-  _emit_s_led(index, HIGH);
+  _set_all_led_data(L);
+  _emit_s_led(index, H);
+
+  delay(1);
 }
