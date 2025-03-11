@@ -1,3 +1,47 @@
+
+#include <iostream>
+
+struct DateTime
+{
+  int year;
+  int month;
+  int day;
+  int hour;
+  int minute;
+  int second;
+};
+
+DateTime utcToPst(DateTime utcTime)
+{
+  DateTime pstTime = utcTime;
+  pstTime.hour += 8;
+
+  if (pstTime.hour >= 24)
+  {
+    pstTime.hour -= 24;
+    pstTime.day++;
+    // Here you would add code that manages the day/month/year rollover.
+    // This requires a function that returns the number of days in a month, and leap year detection.
+    // For simplicity, I will leave that out of this basic example.
+  }
+
+  return pstTime;
+}
+
+int main()
+{
+  DateTime utcTime = {2024, 10, 27, 10, 0, 0}; // Example UTC time
+  DateTime pstTime = utcToPst(utcTime);
+
+  std::cout << "UTC Time: " << utcTime.year << "-" << utcTime.month << "-" << utcTime.day << " "
+            << utcTime.hour << ":" << utcTime.minute << ":" << utcTime.second << std::endl;
+  std::cout << "PST Time: " << pstTime.year << "-" << pstTime.month << "-" << pstTime.day << " "
+            << pstTime.hour << ":" << pstTime.minute << ":" << pstTime.second << std::endl;
+
+  return 0;
+}
+
+// sa/d/sad/as/d/sa/das/d/sa/dsa/d
 #include <Arduino.h>
 #include <ArduinoJson.h>  // Install from Library Manager
 #include <HTTPClient.h>

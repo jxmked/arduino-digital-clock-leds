@@ -1,17 +1,22 @@
 #include <Arduino.h>
 #include <TimeInterval.h>
 
-void setup() {
-    pinMode(5, OUTPUT);
-    pinMode(6, OUTPUT);
+#include "emit_each.h"
 
-    digitalWrite(5, HIGH);
-    digitalWrite(6, LOW);
-}
+TimeInterval counter = TimeInterval(1000, 0, true);
+
+int i = 0;
+
+void setup() { emit_each_setup(); }
 
 void loop() {
-    digitalWrite(5, !digitalRead(5));
-    digitalWrite(6, !digitalRead(6));
+  if (counter.marked()) {
+    i++;
 
-    delay(500);
+    if (i >= 10) {
+      i = 0;
+    }
+  }
+
+  emit_num(0, i);
 }
