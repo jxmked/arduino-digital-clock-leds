@@ -3,6 +3,11 @@
 
 #include "LED_PIN.h"
 
+struct __emit_num {
+
+};
+
+
 void emit_each_setup() {
   pinMode(LED_PIN.A, OUTPUT);
   pinMode(LED_PIN.B, OUTPUT);
@@ -13,17 +18,7 @@ void emit_each_setup() {
   pinMode(LED_PIN.G, OUTPUT);
 }
 
-void _set_all_led_data(int value) {
-  digitalWrite(LED_PIN.A, value);
-  digitalWrite(LED_PIN.B, value);
-  digitalWrite(LED_PIN.C, value);
-  digitalWrite(LED_PIN.D, value);
-  digitalWrite(LED_PIN.E, value);
-  digitalWrite(LED_PIN.F, value);
-  digitalWrite(LED_PIN.G, value);
-}
-
-void _emit_s_led(int index, int mode) {
+void _emit_s_led(uint8_t index, uint8_t mode) {
   switch (index) {
     case 0:
       digitalWrite(LED_PIN.A, mode);
@@ -58,13 +53,18 @@ void _emit_s_led(int index, int mode) {
   }
 }
 
-void _emit_arr_led(const int pins[7], int count, uint8_t state) {
-  for (int i = 0; i < count; i++) {
+void _emit_arr_led(const uint8_t pins[7], uint8_t count, uint8_t state) {
+  for (uint8_t i = 0; i < count; i++) {
     _emit_s_led(pins[i], state);
   }
 }
 
-void emit_num(int seg, int num) {
+void _set_all_led_data(uint8_t value) {
+  uint8_t arr[7] = {0, 1, 2, 3, 4, 5, 6};
+  _emit_arr_led(arr, 7, value);
+}
+
+void emit_num(uint8_t seg, uint8_t num) {
   uint8_t _H = H;
   uint8_t _M = L;
 
@@ -102,54 +102,54 @@ void emit_num(int seg, int num) {
   _set_all_led_data(_M);
   switch (num) {
     case 0: {
-      const int to_emit[7] = {0, 1, 2, 3, 4, 5};
+      const uint8_t to_emit[7] = {0, 1, 2, 3, 4, 5};
       _emit_arr_led(to_emit, 6, _H);
     } break;
 
     case 1: {
-      const int to_emit[7] = {2, 3};
+      const uint8_t to_emit[7] = {2, 3};
       _emit_arr_led(to_emit, 2, _H);
     } break;
 
     case 2: {
-      const int to_emit[7] = {1, 2, 4, 5, 6};
+      const uint8_t to_emit[7] = {1, 2, 4, 5, 6};
       _emit_arr_led(to_emit, 5, _H);
     } break;
 
     case 3: {
-      const int to_emit[7] = {1, 2, 3, 4, 6};
+      const uint8_t to_emit[7] = {1, 2, 3, 4, 6};
       _emit_arr_led(to_emit, 5, _H);
     } break;
 
     case 4: {
-      const int to_emit[7] = {0, 2, 3, 6};
+      const uint8_t to_emit[7] = {0, 2, 3, 6};
       _emit_arr_led(to_emit, 4, _H);
     } break;
 
     case 5: {
-      const int to_emit[7] = {0, 1, 3, 4, 6};
+      const uint8_t to_emit[7] = {0, 1, 3, 4, 6};
       _emit_arr_led(to_emit, 5, _H);
     } break;
 
     case 6: {
-      const int to_emit[7] = {0, 1, 3, 4, 5, 6};
+      const uint8_t to_emit[7] = {0, 1, 3, 4, 5, 6};
       _emit_arr_led(to_emit, 6, _H);
     } break;
 
     case 7: {
-      const int to_emit[7] = {1, 2, 3};
+      const uint8_t to_emit[7] = {1, 2, 3};
       _emit_arr_led(to_emit, 3, _H);
     } break;
 
     case 8: {
-      const int to_emit[7] = {
+      const uint8_t to_emit[7] = {
           0, 1, 2, 3, 4, 5, 6,
       };
       _emit_arr_led(to_emit, 7, _H);
     } break;
 
     case 9: {
-      const int to_emit[7] = {0, 1, 2, 3, 4, 6};
+      const uint8_t to_emit[7] = {0, 1, 2, 3, 4, 6};
       _emit_arr_led(to_emit, 6, _H);
     } break;
 
@@ -160,7 +160,7 @@ void emit_num(int seg, int num) {
   delay(1);
 }
 
-void emit_led(int seg, int index) {
+void emit_led(uint8_t seg, uint8_t index) {
   pinMode(SOURCE_LED.C, INPUT);
   pinMode(SOURCE_LED.D, INPUT);
 
@@ -207,7 +207,7 @@ void emit_led(int seg, int index) {
 /**
  * index = start from sunday = 0
  */
-void emit_week(int index) {
+void emit_week(uint8_t index) {
   pinMode(SOURCE_LED.A, INPUT);
   pinMode(SOURCE_LED.B, INPUT);
   pinMode(SOURCE_LED.D, INPUT);
@@ -229,7 +229,7 @@ void emit_week(int index) {
  *
  * @param index
  */
-void emit_util(int index) {
+void emit_util(uint8_t index) {
   pinMode(SOURCE_LED.A, INPUT);
   pinMode(SOURCE_LED.B, INPUT);
   pinMode(SOURCE_LED.C, INPUT);
