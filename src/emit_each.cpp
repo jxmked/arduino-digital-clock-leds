@@ -168,12 +168,16 @@ void emit_led(int seg, int index) {
     pinMode(SOURCE_LED.A, OUTPUT);
     pinMode(SOURCE_LED.B, INPUT);
 
+    _set_all_led_data(L);
+
     digitalWrite(SOURCE_LED.A, L);
     _emit_s_led(index, H);
 
   } else if (seg == 1) {
     pinMode(SOURCE_LED.A, OUTPUT);
     pinMode(SOURCE_LED.B, INPUT);
+
+    _set_all_led_data(H);
 
     digitalWrite(SOURCE_LED.A, H);
     _emit_s_led(index, L);
@@ -182,12 +186,16 @@ void emit_led(int seg, int index) {
     pinMode(SOURCE_LED.A, INPUT);
     pinMode(SOURCE_LED.B, OUTPUT);
 
+    _set_all_led_data(L);
+
     digitalWrite(SOURCE_LED.B, L);
     _emit_s_led(index, H);
 
   } else if (seg == 3) {
     pinMode(SOURCE_LED.A, INPUT);
     pinMode(SOURCE_LED.B, OUTPUT);
+
+    _set_all_led_data(H);
 
     digitalWrite(SOURCE_LED.B, H);
     _emit_s_led(index, L);

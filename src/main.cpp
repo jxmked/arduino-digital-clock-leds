@@ -35,7 +35,10 @@ void setup() {
 }
 
 void loop() {
-  auto current_num = (millis() / 500) % 10;
+  auto current_num = (millis() / 500) % 28;
 
-  emit_num(0, current_num);
+  if (current_num < 7) emit_led(0, current_num % 7);
+  if (current_num >= 7 && current_num < 14) emit_led(1, current_num % 7);
+  if (current_num >= 14 && current_num < 21) emit_led(2, current_num % 7);
+  if (current_num >= 21 && current_num < 28) emit_led(3, current_num % 7);
 }
