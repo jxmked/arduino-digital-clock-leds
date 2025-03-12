@@ -1,12 +1,15 @@
+#include "emit_each.h"
+
 #include <Arduino.h>
 #include <DEFINITION.h>
 
 #include "LED_PIN.h"
 
-struct __emit_num {
-
-};
-
+__emit_num_values __emit_num_obj[10] = {
+    {{0, 1, 2, 3, 4, 5}, 6}, {{2, 3}, 2},       {{1, 2, 4, 5, 6}, 5},
+    {{1, 2, 3, 4, 6}, 5},    {{0, 2, 3, 6}, 4}, {{0, 1, 3, 4, 6}, 5},
+    {{0, 1, 3, 4, 5, 6}, 6}, {{1, 2, 3}, 3},    {{0, 1, 2, 3, 4, 5, 6}, 6},
+    {{0, 1, 2, 3, 4, 6}, 7}};
 
 void emit_each_setup() {
   pinMode(LED_PIN.A, OUTPUT);
@@ -100,61 +103,9 @@ void emit_num(uint8_t seg, uint8_t num) {
   }
 
   _set_all_led_data(_M);
-  switch (num) {
-    case 0: {
-      const uint8_t to_emit[7] = {0, 1, 2, 3, 4, 5};
-      _emit_arr_led(to_emit, 6, _H);
-    } break;
 
-    case 1: {
-      const uint8_t to_emit[7] = {2, 3};
-      _emit_arr_led(to_emit, 2, _H);
-    } break;
-
-    case 2: {
-      const uint8_t to_emit[7] = {1, 2, 4, 5, 6};
-      _emit_arr_led(to_emit, 5, _H);
-    } break;
-
-    case 3: {
-      const uint8_t to_emit[7] = {1, 2, 3, 4, 6};
-      _emit_arr_led(to_emit, 5, _H);
-    } break;
-
-    case 4: {
-      const uint8_t to_emit[7] = {0, 2, 3, 6};
-      _emit_arr_led(to_emit, 4, _H);
-    } break;
-
-    case 5: {
-      const uint8_t to_emit[7] = {0, 1, 3, 4, 6};
-      _emit_arr_led(to_emit, 5, _H);
-    } break;
-
-    case 6: {
-      const uint8_t to_emit[7] = {0, 1, 3, 4, 5, 6};
-      _emit_arr_led(to_emit, 6, _H);
-    } break;
-
-    case 7: {
-      const uint8_t to_emit[7] = {1, 2, 3};
-      _emit_arr_led(to_emit, 3, _H);
-    } break;
-
-    case 8: {
-      const uint8_t to_emit[7] = {
-          0, 1, 2, 3, 4, 5, 6,
-      };
-      _emit_arr_led(to_emit, 7, _H);
-    } break;
-
-    case 9: {
-      const uint8_t to_emit[7] = {0, 1, 2, 3, 4, 6};
-      _emit_arr_led(to_emit, 6, _H);
-    } break;
-
-    default:
-      break;
+  if (num < 10) {
+    _emit_arr_led(__emit_num_obj[num].leds, __emit_num_obj[num].led_count, _H);
   }
 
   delay(1);

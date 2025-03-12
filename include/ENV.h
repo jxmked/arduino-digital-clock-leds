@@ -3,10 +3,12 @@
 
 #include <Arduino.h>
 
+#include "DOTENV.h"
+
 struct WIFI_CONFIG {
-  char *SSID = "Louqui";
-  char *PASSWORD = "Azerty123";
-  char *HOST_NAME = "jovan's-esp";
+  char *SSID = stringify(WIFI_SSID);
+  char *PASSWORD = stringify(WIFI_PASS);
+  char *HOST_NAME = stringify(WIFI_HOST_NAME);
   // uint8_t macaddress[6] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
   uint8_t macaddress[6] = {0xDE, 0xAD, 0xBE, 0xBA, 0xDA, 0x55};
 };
