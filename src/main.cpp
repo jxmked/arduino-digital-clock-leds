@@ -1,8 +1,11 @@
 #include <Arduino.h>
+#include <DEFINITION.h>
 #include <TimeInterval.h>
 
 #include "emit_each.h"
 #include "esp_pm.h"
+
+TimeInterval timer = TimeInterval(500, 0, true);
 
 esp_pm_config_esp32c3_t pm_config = {
 
@@ -35,10 +38,27 @@ void setup() {
 }
 
 void loop() {
-  auto current_num = (millis() / 500) % 28;
+  auto current_num = (millis() / 250);
+  auto delays = 1;
 
-  if (current_num < 7) emit_led(0, current_num % 7);
-  if (current_num >= 7 && current_num < 14) emit_led(1, current_num % 7);
-  if (current_num >= 14 && current_num < 21) emit_led(2, current_num % 7);
-  if (current_num >= 21 && current_num < 28) emit_led(3, current_num % 7);
+  // if (timer.marked(500)) {
+  //   emit_util(0, L);
+  //   emit_util(1, L);
+  // } else {
+  //   emit_util(0, H);
+  //   emit_util(1, H);
+  // }
+
+  auto minute = current_num / 100;
+
+  delay(delays);
+
+  emit_num(0, current_num % 10);
+  delay(delays);
+  emit_num(2, minute % 10);
+  delay(delays);
+  emit_num(1, (current_num / 10) % 10);
+  delay(delays);
+  emit_num(3, (minute / 10) % 10);
+  delay(delays);
 }

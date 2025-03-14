@@ -22,6 +22,6 @@ void emit_led(uint8_t seg, uint8_t index);
 
 void emit_week(uint8_t index);
 
-void emit_util(uint8_t index);
+void emit_util(uint8_t index, uint8_t state);
 
 #endif

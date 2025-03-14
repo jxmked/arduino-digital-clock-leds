@@ -8,8 +8,8 @@
 __emit_num_values __emit_num_obj[10] = {
     {{0, 1, 2, 3, 4, 5}, 6}, {{2, 3}, 2},       {{1, 2, 4, 5, 6}, 5},
     {{1, 2, 3, 4, 6}, 5},    {{0, 2, 3, 6}, 4}, {{0, 1, 3, 4, 6}, 5},
-    {{0, 1, 3, 4, 5, 6}, 6}, {{1, 2, 3}, 3},    {{0, 1, 2, 3, 4, 5, 6}, 6},
-    {{0, 1, 2, 3, 4, 6}, 7}};
+    {{0, 1, 3, 4, 5, 6}, 6}, {{1, 2, 3}, 3},    {{0, 1, 2, 3, 4, 5, 6}, 7},
+    {{0, 1, 2, 3, 4, 6}, 6}};
 
 void emit_each_setup() {
   pinMode(LED_PIN.A, OUTPUT);
@@ -77,24 +77,29 @@ void emit_num(uint8_t seg, uint8_t num) {
   if (seg == 0) {
     pinMode(SOURCE_LED.A, OUTPUT);
     pinMode(SOURCE_LED.B, INPUT);
+    delay(1);
     digitalWrite(SOURCE_LED.A, _M);
 
-  } else if (seg == 1) {
+  } else if (seg == 2) {
     pinMode(SOURCE_LED.A, OUTPUT);
     pinMode(SOURCE_LED.B, INPUT);
+    delay(1);
+
     digitalWrite(SOURCE_LED.A, _H);
 
     _H = L;
     _M = H;
-  } else if (seg == 2) {
+  } else if (seg == 1) {
     pinMode(SOURCE_LED.A, INPUT);
     pinMode(SOURCE_LED.B, OUTPUT);
+    delay(1);
 
     digitalWrite(SOURCE_LED.B, _M);
 
   } else if (seg == 3) {
     pinMode(SOURCE_LED.A, INPUT);
     pinMode(SOURCE_LED.B, OUTPUT);
+    delay(1);
 
     digitalWrite(SOURCE_LED.B, H);
 
@@ -103,6 +108,7 @@ void emit_num(uint8_t seg, uint8_t num) {
   }
 
   _set_all_led_data(_M);
+  delay(1);
 
   if (num < 10) {
     _emit_arr_led(__emit_num_obj[num].leds, __emit_num_obj[num].led_count, _H);
@@ -180,16 +186,20 @@ void emit_week(uint8_t index) {
  *
  * @param index
  */
-void emit_util(uint8_t index) {
+void emit_util(uint8_t index, uint8_t state) {
   pinMode(SOURCE_LED.A, INPUT);
   pinMode(SOURCE_LED.B, INPUT);
-  pinMode(SOURCE_LED.C, INPUT);
-  pinMode(SOURCE_LED.D, OUTPUT);
+  pinMode(SOURCE_LED.D, INPUT);
+  pinMode(SOURCE_LED.C, OUTPUT);
+  uint8_t _M = H;
+  if (state == _M) {
+    _M = L;
+  }
 
-  digitalWrite(SOURCE_LED.D, L);
+  digitalWrite(SOURCE_LED.C, _M);
 
-  _set_all_led_data(L);
-  _emit_s_led(index, H);
+  _set_all_led_data(_M);
+  _emit_s_led(index, state);
 
   delay(1);
 }
