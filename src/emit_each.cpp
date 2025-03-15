@@ -75,12 +75,23 @@ void emit_num(uint8_t seg, uint8_t num) {
   pinMode(SOURCE_LED.D, INPUT);
 
   if (seg == 0) {
+    digitalWrite(SOURCE_LED.A, _H);
+    digitalWrite(SOURCE_LED.B, _H);
+    digitalWrite(SOURCE_LED.A, _H);
+    digitalWrite(SOURCE_LED.B, _H);
+
     pinMode(SOURCE_LED.A, OUTPUT);
     pinMode(SOURCE_LED.B, INPUT);
+
     delay(1);
     digitalWrite(SOURCE_LED.A, _M);
 
   } else if (seg == 2) {
+    digitalWrite(SOURCE_LED.A, L);
+    digitalWrite(SOURCE_LED.B, L);
+    digitalWrite(SOURCE_LED.A, L);
+    digitalWrite(SOURCE_LED.B, L);
+
     pinMode(SOURCE_LED.A, OUTPUT);
     pinMode(SOURCE_LED.B, INPUT);
     delay(1);
@@ -90,6 +101,11 @@ void emit_num(uint8_t seg, uint8_t num) {
     _H = L;
     _M = H;
   } else if (seg == 1) {
+    digitalWrite(SOURCE_LED.A, _H);
+    digitalWrite(SOURCE_LED.B, _H);
+    digitalWrite(SOURCE_LED.A, _H);
+    digitalWrite(SOURCE_LED.B, _H);
+
     pinMode(SOURCE_LED.A, INPUT);
     pinMode(SOURCE_LED.B, OUTPUT);
     delay(1);
@@ -97,6 +113,11 @@ void emit_num(uint8_t seg, uint8_t num) {
     digitalWrite(SOURCE_LED.B, _M);
 
   } else if (seg == 3) {
+    digitalWrite(SOURCE_LED.A, L);
+    digitalWrite(SOURCE_LED.B, L);
+    digitalWrite(SOURCE_LED.A, L);
+    digitalWrite(SOURCE_LED.B, L);
+
     pinMode(SOURCE_LED.A, INPUT);
     pinMode(SOURCE_LED.B, OUTPUT);
     delay(1);
