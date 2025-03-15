@@ -53,6 +53,23 @@ void combo(uint8_t a, uint8_t b) {
       pinMode(pins[i], INPUT_PULLUP);
     }
 
+  // digitalWrite(ta, LOW);
+  // digitalWrite(tb, LOW);
+  // digitalWrite(ta, LOW);
+  // digitalWrite(tb, LOW);
+
+  digitalWrite(ta, LOW);
+  digitalWrite(tb, LOW);
+  digitalWrite(ta, LOW);
+  digitalWrite(tb, LOW);
+  digitalWrite(ta, LOW);
+  digitalWrite(tb, LOW);
+  digitalWrite(ta, LOW);
+  digitalWrite(tb, LOW);
+  digitalWrite(ta, LOW);
+  digitalWrite(tb, LOW);
+  digitalWrite(ta, LOW);
+  digitalWrite(tb, LOW);
   digitalWrite(ta, LOW);
   digitalWrite(tb, LOW);
   digitalWrite(ta, LOW);
@@ -61,8 +78,9 @@ void combo(uint8_t a, uint8_t b) {
   pinMode(ta, OUTPUT);
   pinMode(tb, OUTPUT);
 
-  digitalWrite(ta, LOW);
-  digitalWrite(tb, LOW);
+  // digitalWrite(ta, LOW);
+  // digitalWrite(tb, LOW);
+
 
   digitalWrite(tb, HIGH);
 
