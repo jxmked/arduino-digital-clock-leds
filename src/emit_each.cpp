@@ -61,7 +61,7 @@ void emit_each_setup() {
 void emit_led_digit(uint8_t digit) {
   for (int i = 0; i < digit_count; i++) {
     pinMode(digit_map[i], INPUT);
-    analogReadMilliVolts(digit_map[i]);
+    // analogReadMilliVolts(digit_map[i]);
   }
 
   // delayMicroseconds(10);
@@ -88,6 +88,8 @@ void emit_led_digit(uint8_t digit) {
       digitalWrite(segment_map[i], res);
     }
 
+    delayMicroseconds(20);
+
     digitalWrite(cur_digit_pin, HIGH);
   } else {
     for (uint8_t i = 0; i < 7; i++) {
@@ -95,6 +97,7 @@ void emit_led_digit(uint8_t digit) {
       digitalWrite(segment_map[i], res);
     }
 
+    delayMicroseconds(20);
     digitalWrite(cur_digit_pin, LOW);
   }
 }
@@ -105,7 +108,7 @@ void emit_num(uint8_t seg, uint8_t num) {
 
   // Set which is common is cathode or anode
   if (seg == 0 || seg == 1) digit_number[seg] |= COMMON_ANODE;
-  if (seg == 2 || seg == 3) digit_codes[seg] |= COMMON_CATHODE;
+  if (seg == 2 || seg == 3) digit_number[seg] |= COMMON_CATHODE;
 
   // for (int i = 0; i < 8; i++) Serial.print(bitRead(digit_number[seg], i));
   // Serial.println();
@@ -117,6 +120,7 @@ void emit_refresh() {
 
   if (ms - last_led_interval > LED_INTERVAL) {
     emit_led_digit(digit_idx);
+    // delayMicroseconds(2000);
 
     digit_idx++;
 

@@ -54,7 +54,8 @@ void loop() {
   //     Serial.println(receivedValue);
   //     cur = receivedValue;
   //   } else {
-  //     Serial.println("Invalid input! Please enter a number between 0 and 255.");
+  //     Serial.println("Invalid input! Please enter a number between 0 and
+  //     255.");
   //   }
 
   //   // Flush buffer
@@ -70,11 +71,11 @@ void loop() {
   // }
 
   auto minute = current_num / 100;
-  emit_num(2, current_num);
-  // emit_num(1, (current_num / 10) % 10);
+  emit_num(0, current_num);
+  emit_num(1, (current_num / 10) % 10);
 
   // delay(delays);
 
-  // emit_num(2, minute % 10);
-  // emit_num(3, (minute / 10) % 10);
+  emit_num(2, minute % 10);
+  emit_num(3, (minute / 10) % 10);
 }
