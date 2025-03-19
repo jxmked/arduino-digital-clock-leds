@@ -5,11 +5,48 @@
 
 #include "LED_PIN.h"
 
-__emit_num_values __emit_num_obj[10] = {
-    {{0, 1, 2, 3, 4, 5}, 6}, {{2, 3}, 2},       {{1, 2, 4, 5, 6}, 5},
-    {{1, 2, 3, 4, 6}, 5},    {{0, 2, 3, 6}, 4}, {{0, 1, 3, 4, 6}, 5},
-    {{0, 1, 3, 4, 5, 6}, 6}, {{1, 2, 3}, 3},    {{0, 1, 2, 3, 4, 5, 6}, 7},
-    {{0, 1, 2, 3, 4, 6}, 6}};
+#define COMMON_ANODE 0x0
+#define COMMON_CATHODE 0x80
+
+#define LED_INTERVAL 2000
+
+//  BBB
+// A   C
+// A   C
+//  GGG
+// F   D
+// F   D
+//  EEE
+
+// -ABCDEFG
+uint8_t digit_codes[] = {
+    0b01111110,  // 0
+    0b00011000,  // 1
+    0b00110111,  // 2
+    0b00111101,  // 3
+    0b01011001,  // 4
+    0b01101101,  // 5
+    0b01101111,  // 6
+    0b00111000,  // 7
+    0b01111111,  // 8
+    0b01111101,  // 9
+
+    // DONT USE FOR NUMBERS
+    // COLON
+    0b01100000,  // :
+};
+
+const uint8_t segment_map[7] = {LED_PIN.A, LED_PIN.B, LED_PIN.C, LED_PIN.D,
+                                LED_PIN.E, LED_PIN.F, LED_PIN.G};
+
+const uint8_t digit_map[5] = {SOURCE_LED.A, SOURCE_LED.B, SOURCE_LED.C,
+                              SOURCE_LED.D};
+
+const uint8_t digit_count = 5;
+uint8_t digit_number[5];
+uint8_t digit_idx = 0;
+
+unsigned long last_led_interval = 0;
 
 void emit_each_setup() {
   pinMode(LED_PIN.A, OUTPUT);
@@ -21,206 +58,74 @@ void emit_each_setup() {
   pinMode(LED_PIN.G, OUTPUT);
 }
 
-void _emit_s_led(uint8_t index, uint8_t mode) {
-  switch (index) {
-    case 0:
-      digitalWrite(LED_PIN.A, mode);
-      break;
-
-    case 1:
-      digitalWrite(LED_PIN.B, mode);
-      break;
-
-    case 2:
-      digitalWrite(LED_PIN.C, mode);
-      break;
-
-    case 3:
-      digitalWrite(LED_PIN.D, mode);
-      break;
-
-    case 4:
-      digitalWrite(LED_PIN.E, mode);
-      break;
-
-    case 5:
-      digitalWrite(LED_PIN.F, mode);
-      break;
-
-    case 6:
-      digitalWrite(LED_PIN.G, mode);
-      break;
-
-    default:
-      break;
+void emit_led_digit(uint8_t digit) {
+  for (int i = 0; i < digit_count; i++) {
+    pinMode(digit_map[i], INPUT);
+    analogReadMilliVolts(digit_map[i]);
   }
-}
 
-void _emit_arr_led(const uint8_t pins[7], uint8_t count, uint8_t state) {
-  for (uint8_t i = 0; i < count; i++) {
-    _emit_s_led(pins[i], state);
+  // delayMicroseconds(10);
+
+  uint8_t code = digit_number[digit];
+
+  if (code == COMMON_ANODE || code == COMMON_CATHODE) {
+    return;
   }
-}
 
-void _set_all_led_data(uint8_t value) {
-  uint8_t arr[7] = {0, 1, 2, 3, 4, 5, 6};
-  _emit_arr_led(arr, 7, value);
+  uint8_t cur_digit_pin;
+
+  if (digit == 0 || digit == 2) {
+    cur_digit_pin = digit_map[0];
+  } else if (digit == 1 || digit == 3) {
+    cur_digit_pin = digit_map[1];
+  }
+
+  pinMode(cur_digit_pin, OUTPUT);
+
+  if (code & COMMON_CATHODE) {
+    for (uint8_t i = 0; i < 7; i++) {
+      bool res = (code & (1 << (6 - i))) ? LOW : HIGH;
+      digitalWrite(segment_map[i], res);
+    }
+
+    digitalWrite(cur_digit_pin, HIGH);
+  } else {
+    for (uint8_t i = 0; i < 7; i++) {
+      bool res = (code & (1 << (6 - i))) ? HIGH : LOW;
+      digitalWrite(segment_map[i], res);
+    }
+
+    digitalWrite(cur_digit_pin, LOW);
+  }
 }
 
 void emit_num(uint8_t seg, uint8_t num) {
-  uint8_t _H = H;
-  uint8_t _M = L;
+  num = num % 10;
+  digit_number[seg] = digit_codes[num];
 
-  pinMode(SOURCE_LED.C, INPUT);
-  pinMode(SOURCE_LED.D, INPUT);
+  // Set which is common is cathode or anode
+  if (seg == 0 || seg == 1) digit_number[seg] |= COMMON_ANODE;
+  if (seg == 2 || seg == 3) digit_codes[seg] |= COMMON_CATHODE;
 
-  if (seg == 0) {
-    digitalWrite(SOURCE_LED.A, _H);
-    digitalWrite(SOURCE_LED.B, _H);
-    digitalWrite(SOURCE_LED.A, _H);
-    digitalWrite(SOURCE_LED.B, _H);
-
-    pinMode(SOURCE_LED.A, OUTPUT);
-    pinMode(SOURCE_LED.B, INPUT);
-
-    delay(1);
-    digitalWrite(SOURCE_LED.A, _M);
-
-  } else if (seg == 2) {
-    digitalWrite(SOURCE_LED.A, L);
-    digitalWrite(SOURCE_LED.B, L);
-    digitalWrite(SOURCE_LED.A, L);
-    digitalWrite(SOURCE_LED.B, L);
-
-    pinMode(SOURCE_LED.A, OUTPUT);
-    pinMode(SOURCE_LED.B, INPUT);
-    delay(1);
-
-    digitalWrite(SOURCE_LED.A, _H);
-
-    _H = L;
-    _M = H;
-  } else if (seg == 1) {
-    digitalWrite(SOURCE_LED.A, _H);
-    digitalWrite(SOURCE_LED.B, _H);
-    digitalWrite(SOURCE_LED.A, _H);
-    digitalWrite(SOURCE_LED.B, _H);
-
-    pinMode(SOURCE_LED.A, INPUT);
-    pinMode(SOURCE_LED.B, OUTPUT);
-    delay(1);
-
-    digitalWrite(SOURCE_LED.B, _M);
-
-  } else if (seg == 3) {
-    digitalWrite(SOURCE_LED.A, L);
-    digitalWrite(SOURCE_LED.B, L);
-    digitalWrite(SOURCE_LED.A, L);
-    digitalWrite(SOURCE_LED.B, L);
-
-    pinMode(SOURCE_LED.A, INPUT);
-    pinMode(SOURCE_LED.B, OUTPUT);
-    delay(1);
-
-    digitalWrite(SOURCE_LED.B, H);
-
-    _H = L;
-    _M = H;
-  }
-
-  _set_all_led_data(_M);
-  delay(1);
-
-  if (num < 10) {
-    _emit_arr_led(__emit_num_obj[num].leds, __emit_num_obj[num].led_count, _H);
-  }
-
-  delay(1);
+  // for (int i = 0; i < 8; i++) Serial.print(bitRead(digit_number[seg], i));
+  // Serial.println();
+  // Serial.println(num);
 }
 
-void emit_led(uint8_t seg, uint8_t index) {
-  pinMode(SOURCE_LED.C, INPUT);
-  pinMode(SOURCE_LED.D, INPUT);
+void emit_refresh() {
+  unsigned long ms = micros();
 
-  if (seg == 0) {
-    pinMode(SOURCE_LED.A, OUTPUT);
-    pinMode(SOURCE_LED.B, INPUT);
+  if (ms - last_led_interval > LED_INTERVAL) {
+    emit_led_digit(digit_idx);
 
-    _set_all_led_data(L);
+    digit_idx++;
 
-    digitalWrite(SOURCE_LED.A, L);
-    _emit_s_led(index, H);
+    if (digit_idx >= digit_count) {
+      digit_idx = 0;
+    }
 
-  } else if (seg == 1) {
-    pinMode(SOURCE_LED.A, OUTPUT);
-    pinMode(SOURCE_LED.B, INPUT);
+    // delayMicroseconds(LED_INTERVAL);
 
-    _set_all_led_data(H);
-
-    digitalWrite(SOURCE_LED.A, H);
-    _emit_s_led(index, L);
-
-  } else if (seg == 2) {
-    pinMode(SOURCE_LED.A, INPUT);
-    pinMode(SOURCE_LED.B, OUTPUT);
-
-    _set_all_led_data(L);
-
-    digitalWrite(SOURCE_LED.B, L);
-    _emit_s_led(index, H);
-
-  } else if (seg == 3) {
-    pinMode(SOURCE_LED.A, INPUT);
-    pinMode(SOURCE_LED.B, OUTPUT);
-
-    _set_all_led_data(H);
-
-    digitalWrite(SOURCE_LED.B, H);
-    _emit_s_led(index, L);
+    last_led_interval = micros();
   }
-
-  delay(1);
-}
-
-/**
- * index = start from sunday = 0
- */
-void emit_week(uint8_t index) {
-  pinMode(SOURCE_LED.A, INPUT);
-  pinMode(SOURCE_LED.B, INPUT);
-  pinMode(SOURCE_LED.D, INPUT);
-  pinMode(SOURCE_LED.C, OUTPUT);
-
-  digitalWrite(SOURCE_LED.C, L);
-
-  _set_all_led_data(L);
-
-  _emit_s_led(index, H);
-
-  delay(1);
-}
-
-/**
- * led 0,1 is each colon
- *
- * led 2 are the am/pm indicator
- *
- * @param index
- */
-void emit_util(uint8_t index, uint8_t state) {
-  pinMode(SOURCE_LED.A, INPUT);
-  pinMode(SOURCE_LED.B, INPUT);
-  pinMode(SOURCE_LED.D, INPUT);
-  pinMode(SOURCE_LED.C, OUTPUT);
-  uint8_t _M = H;
-  if (state == _M) {
-    _M = L;
-  }
-
-  digitalWrite(SOURCE_LED.C, _M);
-
-  _set_all_led_data(_M);
-  _emit_s_led(index, state);
-
-  delay(1);
 }
