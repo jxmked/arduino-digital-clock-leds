@@ -1,7 +1,6 @@
 #include "emit_each.h"
 
 #include <Arduino.h>
-#include <DEFINITION.h>
 
 #include "LED_PIN.h"
 

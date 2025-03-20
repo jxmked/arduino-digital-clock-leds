@@ -1,38 +1,33 @@
 #include <Arduino.h>
-#include <DEFINITION.h>
 #include <TimeInterval.h>
 
+#include "connect.h"
 #include "emit_each.h"
 #include "esp_pm.h"
 
+struct _TIME_t {
+  uint8_t hour;
+  uint8_t minute;
+};
+
+_TIME_t cur_time;
+
 TimeInterval timer = TimeInterval(500, 0, true);
 
-esp_pm_config_esp32c3_t pm_config = {
-
-    .light_sleep_enable = true};
-
 void setup() {
-  esp_err_t res = esp_pm_configure(&pm_config);
-
-  setCpuFrequencyMhz(10);
-
   Serial.begin(9600);
+  while (!Serial);
 
-  delay(2000);
-  // while (!Serial) {
-  //   Serial.print("Initializing serial...");
-  // }
+  connect_setup();
 
-  if (res == ESP_OK) {
-    Serial.println("ESP Configured");
-  } else if (res == ESP_ERR_INVALID_ARG) {
-    Serial.println("Invalid Argument");
-  } else if (res == ESP_ERR_NOT_SUPPORTED) {
-    Serial.println("Err not supported");
-  } else {
-    Serial.print("Error not recognized");
-    Serial.print(res);
-  }
+  // Use build time as initial time
+  const char* timeStr = __TIME__;
+  uint8_t build_hour = (timeStr[0] - '0') * 10 + (timeStr[1] - '0');
+  uint8_t build_minute =
+      ((timeStr[3] - '0') * 10 + (timeStr[4] - '0') + 1) % 60;
+
+  cur_time.hour = build_hour;
+  cur_time.minute = build_minute;
 
   emit_each_setup();
 }
@@ -40,35 +35,9 @@ void setup() {
 void loop() {
   emit_refresh();
 
-  auto current_num = (millis() / 250);
-  auto delays = 1;
-  // static uint8_t cur;
-  // if (Serial.available() > 0) {
-  //   int input = Serial.parseInt();  // Read the integer input
+  connect_loop();
 
-  //   // Validate if it's within 8-bit range (0-255)
-  //   if (input >= 0 && input <= 255) {
-  //     uint8_t receivedValue = (uint8_t)input;  // Convert to uint8_t
-
-  //     Serial.print("Received 8-bit value: ");
-  //     Serial.println(receivedValue);
-  //     cur = receivedValue;
-  //   } else {
-  //     Serial.println("Invalid input! Please enter a number between 0 and
-  //     255.");
-  //   }
-
-  //   // Flush buffer
-  //   while (Serial.available()) Serial.read();
-  // }
-
-  // if (timer.marked(500)) {
-  //   emit_util(0, L);
-  //   emit_util(1, L);
-  // } else {
-  //   emit_util(0, H);
-  //   emit_util(1, H);
-  // }
+  auto current_num = (millis() / 1000);
 
   auto minute = current_num / 100;
   emit_num(0, current_num);
