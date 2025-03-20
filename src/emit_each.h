@@ -11,4 +11,6 @@ void emit_num(uint8_t seg, uint8_t num);
 
 void emit_refresh();
 
+void emit_show_colon();
+
 #endif

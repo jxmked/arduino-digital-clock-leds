@@ -3,11 +3,13 @@
 #include <Arduino.h>
 
 #include "LED_PIN.h"
-
+#include "TimeInterval.h"
 #define COMMON_ANODE 0x0
 #define COMMON_CATHODE 0x80
 
 #define LED_INTERVAL 1000
+
+TimeInterval colon_ival = TimeInterval(500, 0, true);
 
 //  BBB
 // A   C
@@ -32,17 +34,21 @@ uint8_t digit_codes[] = {
 
     // DONT USE FOR NUMBERS
     // COLON
-    0b01100000,  // :
+    0b01100000,  // :  - 10
 };
 
 const uint8_t segment_map[7] = {LED_PIN.A, LED_PIN.B, LED_PIN.C, LED_PIN.D,
                                 LED_PIN.E, LED_PIN.F, LED_PIN.G};
 
-const uint8_t digit_map[5] = {SOURCE_LED.A, SOURCE_LED.B, SOURCE_LED.C,
-                              SOURCE_LED.D};
+const uint8_t digit_map[6] = {SOURCE_LED.A, SOURCE_LED.B, SOURCE_LED.A,
+                              SOURCE_LED.B, SOURCE_LED.C, SOURCE_LED.D};
+
+// const uint8_t digit_map[5] = {SOURCE_LED.A, SOURCE_LED.B, SOURCE_LED.C,
+//                               SOURCE_LED.D};
 
 const uint8_t segment_count = 7;
-const uint8_t digit_count = 5;
+const uint8_t digit_count = 6;
+const uint8_t COLON_IDX = 4;
 
 uint8_t digit_number[digit_count];
 uint8_t digit_idx = 0;
@@ -66,15 +72,9 @@ void emit_led_digit(uint8_t digit) {
     return;
   }
 
-  uint8_t cur_digit_pin;
+  uint8_t cur_digit_pin = digit_map[digit];
   uint8_t s_pos = HIGH;
   uint8_t s_neg = LOW;
-
-  if (digit == 0 || digit == 2) {
-    cur_digit_pin = digit_map[0];
-  } else if (digit == 1 || digit == 3) {
-    cur_digit_pin = digit_map[1];
-  }
 
   if (!(code & COMMON_CATHODE)) {
     s_pos = LOW;
@@ -125,4 +125,15 @@ void emit_refresh() {
 
     last_led_interval = micros();
   }
+}
+
+void emit_show_colon() {
+  if (colon_ival.marked(500)) {
+    // pin A2
+    digit_number[COLON_IDX] = digit_codes[10];
+  } else {
+    digit_number[COLON_IDX] = 0;
+  }
+
+  digit_number[COLON_IDX] |= COMMON_CATHODE;
 }

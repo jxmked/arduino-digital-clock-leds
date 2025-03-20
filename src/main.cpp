@@ -78,6 +78,8 @@ void loop() {
     }
   }
 
+  emit_show_colon();
+
   emit_num(0, cur_time.minute);
   emit_num(1, cur_time.minute / 10);
 
