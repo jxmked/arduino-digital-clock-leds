@@ -3,8 +3,11 @@
 
 #include <Arduino.h>
 
-void connect_fetchAndParseJson();
+#include "TYPES.h"
+
+bool connect_fetchAndParseJson();
 void connect_setup();
-void connect_loop();
+UPDATE_TIME_CONST connect_loop();
+void connect_update_time(_TIME_t *_cur_time);
 
 #endif

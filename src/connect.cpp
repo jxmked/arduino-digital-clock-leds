@@ -10,13 +10,12 @@
 
 #include "DOTENV.h"
 #include "ENV.h"
+#include "TYPES.h"
 
-unsigned long wifiOnInterval = 30000;  // 1 hour (3600000 milliseconds)
-unsigned long wifiOnDuration = 30000;  // 2 minutes (120000 milliseconds)
+_TIME_t adjustable_time;
 
-unsigned long previousMillis = 0;
-bool wifiEnabled = false;
-unsigned long wifiStartTime = 0;
+int state = 0;
+int conn_attempt = 0;
 
 void connect_setup() {
   WiFi.mode(WIFI_OFF);
@@ -30,48 +29,73 @@ void connect_setup() {
   Serial.println("Wi-Fi initially off.");
 }
 
-void connect_loop() {
-  unsigned long currentMillis = millis();
-
-  if (wifiEnabled) {
-    if (currentMillis - wifiStartTime >= wifiOnDuration) {
-      WiFi.disconnect(true);
-      WiFi.mode(WIFI_OFF);
-      wifiEnabled = false;
-      Serial.println("Wi-Fi off.");
-      previousMillis = currentMillis;
-    }
-  } else {
-    if (currentMillis - previousMillis >= wifiOnInterval) {
+UPDATE_TIME_CONST connect_loop() {
+  // Non-blocking ???
+  switch (state) {
+    case 0:
       WiFi.mode(WIFI_STA);
       WiFi.begin(stringify(WIFI_SSID), stringify(WIFI_PASS));
-      Serial.printf("SSID: %s : %s \n\n", stringify(WIFI_SSID), stringify(WIFI_PASS));
+
+      Serial.printf("SSID: %s \n\n", stringify(WIFI_SSID));
+
       Serial.print("Connecting to Wi-Fi...");
 
-      int attempts = 0;
+      state = 1;
+      break;
 
-      while (WiFi.status() != WL_CONNECTED && attempts < 20) {
-        delay(500);
-        Serial.print(".");
-        attempts++;
-      }
-
+    case 1:
       if (WiFi.status() == WL_CONNECTED) {
         Serial.println("\nWi-Fi connected!");
-        wifiEnabled = true;
-        wifiStartTime = currentMillis;
-        connect_fetchAndParseJson();  // Fetch and parse JSON data
+        state = 2;
       } else {
-        Serial.println("\nWi-Fi connection failed.");
-        WiFi.disconnect(true);
-        WiFi.mode(WIFI_OFF);
-        previousMillis = currentMillis;
+        Serial.print(".");
+
+        conn_attempt++;
       }
-    }
+
+      if (conn_attempt >= 20) {
+        state = 3;  // jump to 3 instead of 2
+      }
+
+      break;
+
+    case 2: {
+      Serial.println("fetching time");
+      conn_attempt = 0;
+      state = 0;
+
+      bool fetch_ok = connect_fetchAndParseJson();
+
+      WiFi.disconnect(true);
+      WiFi.mode(WIFI_OFF);
+
+      if (fetch_ok) {
+        return UPDATE_TIME_CONST::OK;
+      }
+      return UPDATE_TIME_CONST::FAIL;
+    } break;
+
+    case 3:
+      Serial.println("\nWi-Fi connection failed.");
+      WiFi.disconnect(true);
+      WiFi.mode(WIFI_OFF);
+
+      conn_attempt = 0;
+      state = 0;
+
+      return UPDATE_TIME_CONST::FAIL;
+
+      break;
+
+    default:
+      break;
   }
+
+  // return 1 so we can go back here and resume
+  return UPDATE_TIME_CONST::CONTINUE;
 }
 
-void connect_fetchAndParseJson() {
+bool connect_fetchAndParseJson() {
   HTTPClient http;
 
   http.begin(DATE_TIME_API_URL);
@@ -82,34 +106,40 @@ void connect_fetchAndParseJson() {
     Serial.println("Failed to fetch data/time");
     http.end();
 
-    return;
+    return false;
   }
 
   String payload = http.getString();
-
-  Serial.println("JSON Payload:");
-  Serial.println(payload);
 
   JsonDocument doc;
   DeserializationError error = deserializeJson(doc, payload);
 
   if (error) {
     Serial.print("JSON parsing failed: ");
-    Serial.println(error.c_str());
 
     http.end();
 
-    return;
+    return false;
   }
 
   JsonObject obj = doc.as<JsonObject>();
 
-  uint8_t hour = obj["hour"].as<const uint8_t>();
-  uint8_t minute = obj["minute"].as<const uint8_t>();
-
-  Serial.print(hour);
-  Serial.print(":");
-  Serial.println(minute);
+  adjustable_time.hour = obj["hour"].as<const uint8_t>();
+  adjustable_time.minute = obj["minute"].as<const uint8_t>();
+  adjustable_time.day = obj["day"].as<const uint8_t>();
+  adjustable_time.month = obj["month"].as<const uint8_t>();
+  adjustable_time.year = obj["year"].as<const uint8_t>();
 
   http.end();
+
+  return true;
+}
+
+void connect_update_time(_TIME_t* _cur_time) {
+  _cur_time->hour = adjustable_time.hour;
+  _cur_time->minute = adjustable_time.minute;
+
+  _cur_time->day = adjustable_time.day;
+  _cur_time->month = adjustable_time.month;
+  _cur_time->year = adjustable_time.year;
 }
