@@ -8,7 +8,7 @@
 #define COMMON_ANODE 0x0
 #define COMMON_CATHODE 0x80
 
-#define LED_INTERVAL 2000
+#define LED_INTERVAL 1000
 
 //  BBB
 // A   C
@@ -42,29 +42,24 @@ const uint8_t segment_map[7] = {LED_PIN.A, LED_PIN.B, LED_PIN.C, LED_PIN.D,
 const uint8_t digit_map[5] = {SOURCE_LED.A, SOURCE_LED.B, SOURCE_LED.C,
                               SOURCE_LED.D};
 
+const uint8_t segment_count = 7;
 const uint8_t digit_count = 5;
-uint8_t digit_number[5];
+
+uint8_t digit_number[digit_count];
 uint8_t digit_idx = 0;
 
 unsigned long last_led_interval = 0;
 
 void emit_each_setup() {
-  pinMode(LED_PIN.A, OUTPUT);
-  pinMode(LED_PIN.B, OUTPUT);
-  pinMode(LED_PIN.C, OUTPUT);
-  pinMode(LED_PIN.D, OUTPUT);
-  pinMode(LED_PIN.E, OUTPUT);
-  pinMode(LED_PIN.F, OUTPUT);
-  pinMode(LED_PIN.G, OUTPUT);
+  for (int i = 0; i < segment_count; i++) {
+    pinMode(segment_map[i], OUTPUT);
+  }
 }
 
 void emit_led_digit(uint8_t digit) {
   for (int i = 0; i < digit_count; i++) {
     pinMode(digit_map[i], INPUT);
-    // analogReadMilliVolts(digit_map[i]);
   }
-
-  // delayMicroseconds(10);
 
   uint8_t code = digit_number[digit];
 
@@ -73,6 +68,8 @@ void emit_led_digit(uint8_t digit) {
   }
 
   uint8_t cur_digit_pin;
+  uint8_t s_pos = HIGH;
+  uint8_t s_neg = LOW;
 
   if (digit == 0 || digit == 2) {
     cur_digit_pin = digit_map[0];
@@ -80,39 +77,42 @@ void emit_led_digit(uint8_t digit) {
     cur_digit_pin = digit_map[1];
   }
 
-  pinMode(cur_digit_pin, OUTPUT);
-
-  if (code & COMMON_CATHODE) {
-    for (uint8_t i = 0; i < 7; i++) {
-      bool res = (code & (1 << (6 - i))) ? LOW : HIGH;
-      digitalWrite(segment_map[i], res);
-    }
-
-    delayMicroseconds(20);
-
-    digitalWrite(cur_digit_pin, HIGH);
-  } else {
-    for (uint8_t i = 0; i < 7; i++) {
-      bool res = (code & (1 << (6 - i))) ? HIGH : LOW;
-      digitalWrite(segment_map[i], res);
-    }
-
-    delayMicroseconds(20);
-    digitalWrite(cur_digit_pin, LOW);
+  if (!(code & COMMON_CATHODE)) {
+    s_pos = LOW;
+    s_neg = HIGH;
   }
+
+  for (uint8_t i = 0; i < 7; i++) {
+    digitalWrite(segment_map[i], s_pos);
+  }
+
+  for (uint8_t i = 0; i < 7; i++) {
+    bool res = (code & (1 << (6 - i))) ? s_neg : s_pos;
+    digitalWrite(segment_map[i], res);
+  }
+
+  delayMicroseconds(100);
+
+  /**
+   * idk but this works.
+   * it completely eliminate some
+   * led that arent assigned to lit
+   *
+   */
+  digitalWrite(cur_digit_pin, s_pos);
+  digitalWrite(cur_digit_pin, s_pos);
+  digitalWrite(cur_digit_pin, s_pos);
+
+  pinMode(cur_digit_pin, OUTPUT);
+  digitalWrite(cur_digit_pin, s_pos);
 }
 
 void emit_num(uint8_t seg, uint8_t num) {
-  num = num % 10;
-  digit_number[seg] = digit_codes[num];
+  digit_number[seg] = digit_codes[num % 10];
 
   // Set which is common is cathode or anode
   if (seg == 0 || seg == 1) digit_number[seg] |= COMMON_ANODE;
   if (seg == 2 || seg == 3) digit_number[seg] |= COMMON_CATHODE;
-
-  // for (int i = 0; i < 8; i++) Serial.print(bitRead(digit_number[seg], i));
-  // Serial.println();
-  // Serial.println(num);
 }
 
 void emit_refresh() {
@@ -120,15 +120,9 @@ void emit_refresh() {
 
   if (ms - last_led_interval > LED_INTERVAL) {
     emit_led_digit(digit_idx);
-    // delayMicroseconds(2000);
 
     digit_idx++;
-
-    if (digit_idx >= digit_count) {
-      digit_idx = 0;
-    }
-
-    // delayMicroseconds(LED_INTERVAL);
+    if (digit_idx >= digit_count) digit_idx = 0;
 
     last_led_interval = micros();
   }

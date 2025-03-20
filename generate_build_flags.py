@@ -1,9 +1,10 @@
 import os
 
 build_flags = [
-    "// DO NOT MODIFY MANUALLY!!!",
+    "// DO NOT MODIFY",
     "#ifndef ___DOTENV_h",
     "#define ___DOTENV_h",
+    "",
     "#define stringify(s) _stringifyDo(s)",
     "#define _stringifyDo(s) #s"
 ]

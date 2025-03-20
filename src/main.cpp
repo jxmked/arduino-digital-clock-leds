@@ -40,7 +40,7 @@ void setup() {
 void loop() {
   emit_refresh();
 
-  auto current_num = (millis() / 1000);
+  auto current_num = (millis() / 250);
   auto delays = 1;
   // static uint8_t cur;
   // if (Serial.available() > 0) {
@@ -72,10 +72,10 @@ void loop() {
 
   auto minute = current_num / 100;
   emit_num(0, current_num);
-  emit_num(1, (current_num / 10) % 10);
+  emit_num(1, current_num / 10);
 
   // delay(delays);
 
-  emit_num(2, minute % 10);
-  emit_num(3, (minute / 10) % 10);
+  emit_num(2, minute);
+  emit_num(3, minute / 10);
 }

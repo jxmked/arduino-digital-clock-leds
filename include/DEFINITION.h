@@ -1,11 +1,13 @@
 #ifndef DEFINITION_h
 #define DEFINITION_h
 
-/**
- * Incase of microcontroller uses the opposite HIGH?LOW setup
- */
-
-#define H HIGH
-#define L LOW
+struct DateTime {
+  int year;
+  int month;
+  int day;
+  int hour;
+  int minute;
+  int second;
+};
 
 #endif
