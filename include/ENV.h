@@ -8,7 +8,7 @@
 const uint8_t MAC_ADDR[6] = {0xDE, 0xAD, 0xBE, 0xBA, 0xDA, 0x55};
 
 struct WIFI_INTERVAL {
-  int TURN_ON = (30) * 1000;  // 12 Hours
+  int TURN_ON = (60 * 60 * 12) * 1000;  // 12 Hours
   int KEEP_ON = (60 * 5) * 1000;  // 5 Minutes. While no connection to be found
 };
 
