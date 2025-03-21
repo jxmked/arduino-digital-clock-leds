@@ -29,10 +29,12 @@ TimeInterval switching_ival = TimeInterval(switching_time.TIME_ON, 0, true);
 // Prevent showing date when its not set/updated
 bool is_date_set = false;
 unsigned long last_update = 0;
+int anim_ival = 720;
 
 static void display_date(void);
 static void display_time(void);
 static bool update_time(void);
+static void show_animation(void);
 
 void setup() {
   Serial.begin(9600);
@@ -52,19 +54,8 @@ void setup() {
 
   // INITIAL UPDATE
   unsigned long last_check = 0;
-  int anim_ival = 720;
   while (true) {
-    auto ms = millis();
-
-    emit_refresh();
-
-    emit_clear_digit(0);
-    emit_clear_digit(1);
-    emit_clear_digit(2);
-    emit_clear_digit(3);
-
-    emit_display_char((ms / anim_ival) % 4,
-                      0x40 >> (6 - ((ms / (anim_ival / 7)) % 7)));
+    show_animation();
 
     if (millis() - last_check >= 1000) {
       if (update_time()) break;
@@ -76,17 +67,9 @@ void setup() {
 void loop() {
   emit_refresh();
 
-  // update if the day just passed
-  if (cur_time.hour == 0 && cur_time.minute <= 3) {
-    is_date_set = false;
-  }
-
-  // Keep 30 mins difference from last update
-  if (!is_date_set && (millis() - last_update >= (60 * 30 * 1000))) {
-    update_time();
-  }
-
-  if (update_time_ival.marked(wifi_update_conf.KEEP_ON)) {
+  // Keep 30 mins difference from last update if the date is not set
+  if (update_time_ival.marked(wifi_update_conf.KEEP_ON) ||
+      (!is_date_set && (millis() - last_update >= (60 * 30 * 1000)))) {
     update_time();
   }
 
@@ -100,16 +83,33 @@ void loop() {
 
       if (cur_time.hour >= 24) {
         cur_time.hour = 0;
+
+        // The day just past
+        is_date_set = false;
       }
     }
   }
 
   // prevent showing the date when its not being updated
-  if (!is_date_set || switching_ival.marked(switching_time.DATE_ON)) {
+  if (is_date_set && switching_ival.marked(switching_time.DATE_ON)) {
     display_date();
   } else {
     display_time();
   }
+}
+
+static void show_animation(void) {
+  auto ms = millis();
+
+  emit_refresh();
+
+  emit_clear_digit(0);
+  emit_clear_digit(1);
+  emit_clear_digit(2);
+  emit_clear_digit(3);
+
+  emit_display_char((ms / anim_ival) % 4,
+                    0x40 >> (6 - ((ms / (anim_ival / 7)) % 7)));
 }
 
 static bool update_time(void) {
@@ -141,7 +141,6 @@ static void display_time(void) {
   uint8_t minute = cur_time.minute;
   uint8_t hour = cur_time.hour;
 
-  // Only affect the time when its standby
   if (MILITARY_TIME == 0) {
     if (hour == 0) {
       hour = 12;

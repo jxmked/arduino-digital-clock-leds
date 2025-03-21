@@ -14,9 +14,6 @@
 
 _TIME_t adjustable_time;
 
-int state = 0;
-int conn_attempt = 0;
-
 void connect_setup() {
   WiFi.mode(WIFI_OFF);
 
@@ -28,6 +25,9 @@ void connect_setup() {
 }
 
 UPDATE_TIME_CONST connect_loop() {
+  static uint8_t state = 0;
+  static unsigned long conn_ival = 0;
+
   // Non-blocking ???
   switch (state) {
     case 0:
@@ -42,17 +42,15 @@ UPDATE_TIME_CONST connect_loop() {
       break;
 
     case 1:
+      if (conn_ival == 0) conn_ival = millis();
+
       if (WiFi.status() == WL_CONNECTED) {
         Serial.println("\nWi-Fi connected!");
         state = 2;
-      } else {
-        // This delay caused side-effect on display
-        // But its important to keep the some time to connect
-        // delay(50);
-        conn_attempt++;
-      }
 
-      if (conn_attempt >= 5000) {
+      } else if (millis() - conn_ival >= 10000) {
+        // Wait for 10 seconds before
+        // we declaire of failure
         Serial.println("\nWi-Fi connection failed.");
 
         state = 3;  // jump to 3 instead of 2
@@ -62,7 +60,7 @@ UPDATE_TIME_CONST connect_loop() {
 
     case 2: {
       Serial.println("Fetching time");
-      conn_attempt = 0;
+      conn_ival = 0;
       state = 0;
 
       bool fetch_ok = connect_fetchAndParseJson();
@@ -77,7 +75,7 @@ UPDATE_TIME_CONST connect_loop() {
 
       Serial.println("Fetching failed");
       return UPDATE_TIME_CONST::FAIL;
-    } break;
+    };
 
     case 3:
       Serial.println("Closing Connection");
@@ -85,18 +83,12 @@ UPDATE_TIME_CONST connect_loop() {
       WiFi.disconnect(true);
       WiFi.mode(WIFI_OFF);
 
-      conn_attempt = 0;
+      conn_ival = 0;
       state = 0;
 
       return UPDATE_TIME_CONST::FAIL;
-
-      break;
-
-    default:
-      break;
   }
 
-  // return 1 so we can go back here and resume
   return UPDATE_TIME_CONST::CONTINUE;
 }
 
