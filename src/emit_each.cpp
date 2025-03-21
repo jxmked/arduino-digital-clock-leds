@@ -106,12 +106,12 @@ void emit_led_digit(uint8_t digit) {
   digitalWrite(cur_digit_pin, s_pos);
 }
 
-void emit_num(uint8_t seg, uint8_t num) {
-  digit_number[seg] = digit_codes[num % 10];
+void emit_num(uint8_t digit, uint8_t num) {
+  digit_number[digit] = digit_codes[num % 10];
 
   // Set which is common is cathode or anode
-  if (seg == 0 || seg == 1) digit_number[seg] |= COMMON_ANODE;
-  if (seg == 2 || seg == 3) digit_number[seg] |= COMMON_CATHODE;
+  if (digit == 0 || digit == 1) digit_number[digit] |= COMMON_ANODE;
+  if (digit == 2 || digit == 3) digit_number[digit] |= COMMON_CATHODE;
 }
 
 void emit_refresh() {
@@ -127,13 +127,14 @@ void emit_refresh() {
   }
 }
 
-void emit_show_colon() {
-  if (colon_ival.marked(500)) {
+void emit_show_colon(bool keep_off) {
+  if (colon_ival.marked(500) && !keep_off) {
     // pin A2
     digit_number[COLON_IDX] = digit_codes[10];
+    digit_number[COLON_IDX] |= COMMON_CATHODE;
   } else {
     digit_number[COLON_IDX] = 0;
   }
-
-  digit_number[COLON_IDX] |= COMMON_CATHODE;
 }
+
+void emit_clear_digit(uint8_t digit) { digit_number[digit] = 0; }

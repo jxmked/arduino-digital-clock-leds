@@ -7,14 +7,17 @@
 #include "emit_each.h"
 #include "esp_pm.h"
 
+_TIME_t cur_time;
+
 WIFI_INTERVAL wifi_update_conf;
+SWITCH_TIME_DATE switching_time;
 
 // 1 minute
 TimeInterval time_tick = TimeInterval(60000, 0, true);
 
 TimeInterval update_time_ival = TimeInterval(wifi_update_conf.TURN_ON, 0, true);
 
-_TIME_t cur_time;
+TimeInterval switching_ival = TimeInterval(switching_time.DATE_ON, 0, true);
 
 bool update_time() {
   UPDATE_TIME_CONST status = connect_loop();
@@ -36,25 +39,24 @@ void setup() {
   while (!Serial);
 
   connect_setup();
+  emit_each_setup();
 
   // Use build time as initial time
-  const char* timeStr = __TIME__;
-  uint8_t build_hour = (timeStr[0] - '0') * 10 + (timeStr[1] - '0');
-  uint8_t build_minute =
-      ((timeStr[3] - '0') * 10 + (timeStr[4] - '0') + 1) % 60;
+  // const char* timeStr = __TIME__;
+  // uint8_t build_hour = (timeStr[0] - '0') * 10 + (timeStr[1] - '0');
+  // uint8_t build_minute =
+  //     ((timeStr[3] - '0') * 10 + (timeStr[4] - '0') + 1) % 60;
 
-  cur_time.hour = build_hour;
-  cur_time.minute = build_minute;
+  // cur_time.hour = build_hour;
+  // cur_time.minute = build_minute;
 
   int attempt = 0;
   while (true) {
-    if (update_time() || attempt >= 1000) {
+    if (update_time() || attempt > 1000) {
       break;
     }
     attempt++;
   }
-
-  emit_each_setup();
 }
 
 void loop() {
@@ -78,11 +80,25 @@ void loop() {
     }
   }
 
-  emit_show_colon();
+  if (switching_ival.marked(switching_time.TIME_ON)) {
+    emit_show_colon();
 
-  emit_num(0, cur_time.minute);
-  emit_num(1, cur_time.minute / 10);
+    emit_num(0, cur_time.minute);
+    emit_num(1, cur_time.minute / 10);
 
-  emit_num(2, cur_time.hour);
-  emit_num(3, cur_time.hour / 10);
+    emit_num(2, cur_time.hour);
+    emit_num(3, cur_time.hour / 10);
+  } else {
+    emit_show_colon(true);
+
+    emit_num(0, cur_time.month);
+    emit_num(1, cur_time.month / 10);
+
+    if (cur_time.month < 10) emit_clear_digit(1);
+
+    emit_num(2, cur_time.day);
+    emit_num(3, cur_time.day / 10);
+
+    if (cur_time.day < 10) emit_clear_digit(3);
+  }
 }
