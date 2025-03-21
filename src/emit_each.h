@@ -15,4 +15,6 @@ void emit_show_colon(bool keep_off = false);
 
 void emit_clear_digit(uint8_t digit);
 
+void emit_display_char(uint8_t digit, uint8_t ui_8);
+
 #endif

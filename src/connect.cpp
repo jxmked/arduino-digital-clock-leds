@@ -25,8 +25,6 @@ void connect_setup() {
   WiFi.setHostname(stringify(WIFI_HOST_NAME));
 
   delay(1000);
-
-  Serial.println("Wi-Fi initially off.");
 }
 
 UPDATE_TIME_CONST connect_loop() {
@@ -48,19 +46,22 @@ UPDATE_TIME_CONST connect_loop() {
         Serial.println("\nWi-Fi connected!");
         state = 2;
       } else {
-        Serial.print(".");
-
+        // This delay caused side-effect on display
+        // But its important to keep the some time to connect
+        // delay(50);
         conn_attempt++;
       }
 
-      if (conn_attempt >= 20) {
+      if (conn_attempt >= 5000) {
+        Serial.println("\nWi-Fi connection failed.");
+
         state = 3;  // jump to 3 instead of 2
       }
 
       break;
 
     case 2: {
-      Serial.println("fetching time");
+      Serial.println("Fetching time");
       conn_attempt = 0;
       state = 0;
 
@@ -70,13 +71,17 @@ UPDATE_TIME_CONST connect_loop() {
       WiFi.mode(WIFI_OFF);
 
       if (fetch_ok) {
+        Serial.println("Fetching success");
         return UPDATE_TIME_CONST::OK;
       }
+
+      Serial.println("Fetching failed");
       return UPDATE_TIME_CONST::FAIL;
     } break;
 
     case 3:
-      Serial.println("\nWi-Fi connection failed.");
+      Serial.println("Closing Connection");
+
       WiFi.disconnect(true);
       WiFi.mode(WIFI_OFF);
 

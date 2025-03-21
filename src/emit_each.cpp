@@ -19,6 +19,7 @@ TimeInterval colon_ival = TimeInterval(500, 0, true);
 // F   D
 //  EEE
 
+// - = set if common anode or common cathode
 // -ABCDEFG
 uint8_t digit_codes[] = {
     0b01111110,  // 0
@@ -107,6 +108,7 @@ void emit_led_digit(uint8_t digit) {
 }
 
 void emit_num(uint8_t digit, uint8_t num) {
+  digit = digit % digit_count;
   digit_number[digit] = digit_codes[num % 10];
 
   // Set which is common is cathode or anode
@@ -138,3 +140,12 @@ void emit_show_colon(bool keep_off) {
 }
 
 void emit_clear_digit(uint8_t digit) { digit_number[digit] = 0; }
+
+void emit_display_char(uint8_t digit, uint8_t ui_8) {
+  digit = digit % digit_count;
+  digit_number[digit] = ui_8;
+
+  // Set which is common is cathode or anode
+  if (digit == 0 || digit == 1) digit_number[digit] |= COMMON_ANODE;
+  if (digit == 2 || digit == 3) digit_number[digit] |= COMMON_CATHODE;
+}
