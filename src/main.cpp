@@ -24,7 +24,7 @@ TimeInterval time_tick = TimeInterval(60000, 0, true);
 TimeInterval update_time_ival = TimeInterval(wifi_update_conf.TURN_ON, 0, true);
 
 // Switch display between date and time
-TimeInterval switching_ival = TimeInterval(switching_time.DATE_ON, 0, true);
+TimeInterval switching_ival = TimeInterval(switching_time.TIME_ON, 0, true);
 
 // Prevent showing date when its not set/updated
 bool is_date_set = false;
@@ -105,7 +105,7 @@ void loop() {
   }
 
   // prevent showing the date when its not being updated
-  if (!is_date_set || switching_ival.marked(switching_time.TIME_ON)) {
+  if (!is_date_set || switching_ival.marked(switching_time.DATE_ON)) {
     display_date();
   } else {
     display_time();

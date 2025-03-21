@@ -13,7 +13,7 @@ struct WIFI_INTERVAL {
 };
 
 struct SWITCH_TIME_DATE {
-  int TIME_ON = 3000;
+  int TIME_ON = 5000;
   int DATE_ON = 2000;
 };
 
