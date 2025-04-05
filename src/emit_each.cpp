@@ -22,6 +22,7 @@ TimeInterval colon_ival = TimeInterval(500, 0, true);
 // - = set if common anode or common cathode
 // -ABCDEFG
 uint8_t digit_codes[] = {
+    // bin          char - index
     0b01111110,  // 0
     0b00011000,  // 1
     0b00110111,  // 2
@@ -33,8 +34,6 @@ uint8_t digit_codes[] = {
     0b01111111,  // 8
     0b01111101,  // 9
 
-    // DONT USE FOR NUMBERS
-    // COLON
     0b01100000,  // :  - 10
 };
 
@@ -43,9 +42,6 @@ const uint8_t segment_map[7] = {LED_PIN.A, LED_PIN.B, LED_PIN.C, LED_PIN.D,
 
 const uint8_t digit_map[6] = {SOURCE_LED.A, SOURCE_LED.B, SOURCE_LED.A,
                               SOURCE_LED.B, SOURCE_LED.C, SOURCE_LED.D};
-
-// const uint8_t digit_map[5] = {SOURCE_LED.A, SOURCE_LED.B, SOURCE_LED.C,
-//                               SOURCE_LED.D};
 
 const uint8_t segment_count = 7;
 const uint8_t digit_count = 6;
@@ -83,10 +79,6 @@ void emit_led_digit(uint8_t digit) {
   }
 
   for (uint8_t i = 0; i < 7; i++) {
-    digitalWrite(segment_map[i], s_pos);
-  }
-
-  for (uint8_t i = 0; i < 7; i++) {
     bool res = (code & (1 << (6 - i))) ? s_neg : s_pos;
     digitalWrite(segment_map[i], res);
   }
@@ -111,9 +103,7 @@ void emit_num(uint8_t digit, uint8_t num) {
   digit = digit % digit_count;
   digit_number[digit] = digit_codes[num % 10];
 
-  // Set which is common is cathode or anode
-  if (digit == 0 || digit == 1) digit_number[digit] |= COMMON_ANODE;
-  if (digit == 2 || digit == 3) digit_number[digit] |= COMMON_CATHODE;
+  emit_set_electrode(digit);
 }
 
 void emit_refresh() {
@@ -145,6 +135,10 @@ void emit_display_char(uint8_t digit, uint8_t ui_8) {
   digit = digit % digit_count;
   digit_number[digit] = ui_8;
 
+  emit_set_electrode(digit);
+}
+
+void emit_electrode(uint8_t digit) {
   // Set which is common is cathode or anode
   if (digit == 0 || digit == 1) digit_number[digit] |= COMMON_ANODE;
   if (digit == 2 || digit == 3) digit_number[digit] |= COMMON_CATHODE;

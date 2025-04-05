@@ -67,9 +67,9 @@ void setup() {
 void loop() {
   emit_refresh();
 
-  // Keep 30 mins difference from last update if the date is not set
+  // Keep 5 mins difference from last update if the date is not set
   if (update_time_ival.marked(wifi_update_conf.KEEP_ON) ||
-      (!is_date_set && (millis() - last_update >= (60 * 30 * 1000)))) {
+      (!is_date_set && (millis() - last_update >= (60 * 5 * 1000)))) {
     update_time();
   }
 
@@ -163,15 +163,15 @@ static void display_time(void) {
 static void display_date(void) {
   emit_show_colon(true);
 
-  emit_num(0, cur_time.month);
-  emit_num(1, cur_time.month / 10);
+  emit_num(0, cur_time.day);
+  emit_num(1, cur_time.day / 10);
 
   // Turn off other zero at the front
-  if (cur_time.month < 10) emit_clear_digit(1);
+  if (cur_time.day < 10) emit_clear_digit(1);
 
-  emit_num(2, cur_time.day);
-  emit_num(3, cur_time.day / 10);
+  emit_num(2, cur_time.month);
+  emit_num(3, cur_time.month / 10);
 
   // Turn off other zero at the front
-  if (cur_time.day < 10) emit_clear_digit(3);
+  if (cur_time.month < 10) emit_clear_digit(3);
 }

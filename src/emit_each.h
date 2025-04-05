@@ -17,4 +17,6 @@ void emit_clear_digit(uint8_t digit);
 
 void emit_display_char(uint8_t digit, uint8_t ui_8);
 
+void emit_set_electrode(uint8_t digit);
+
 #endif

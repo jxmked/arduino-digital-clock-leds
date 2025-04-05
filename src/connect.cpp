@@ -123,6 +123,7 @@ bool connect_fetchAndParseJson() {
 
   adjustable_time.hour = obj["hour"].as<const uint8_t>();
   adjustable_time.minute = obj["minute"].as<const uint8_t>();
+  adjustable_time.second = obj["second"].as<const uint8_t>();
   adjustable_time.day = obj["day"].as<const uint8_t>();
   adjustable_time.month = obj["month"].as<const uint8_t>();
   adjustable_time.year = obj["year"].as<const uint8_t>();
@@ -135,6 +136,7 @@ bool connect_fetchAndParseJson() {
 void connect_update_time(_TIME_t* _cur_time) {
   _cur_time->hour = adjustable_time.hour;
   _cur_time->minute = adjustable_time.minute;
+  _cur_time->second = adjustable_time.second;
 
   _cur_time->day = adjustable_time.day;
   _cur_time->month = adjustable_time.month;
