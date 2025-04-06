@@ -138,7 +138,7 @@ void emit_display_char(uint8_t digit, uint8_t ui_8) {
   emit_set_electrode(digit);
 }
 
-void emit_electrode(uint8_t digit) {
+void emit_set_electrode(uint8_t digit) {
   // Set which is common is cathode or anode
   if (digit == 0 || digit == 1) digit_number[digit] |= COMMON_ANODE;
   if (digit == 2 || digit == 3) digit_number[digit] |= COMMON_CATHODE;
