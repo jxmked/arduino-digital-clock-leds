@@ -2,10 +2,11 @@
 #include "connect.h"
 
 #include <Arduino.h>
-#include <ArduinoJson.h>
 #include <HTTPClient.h>
+#include <NTPClient.h>
 #include <TimeInterval.h>
 #include <WiFi.h>
+#include <WiFiUdp.h>
 #include <esp_wifi.h>
 
 #include "DOTENV.h"
@@ -13,6 +14,12 @@
 #include "TYPES.h"
 
 _TIME_t adjustable_time;
+
+bool update_success = false;
+
+WiFiUDP ntpUDP;
+
+NTPClient timeClient(ntpUDP);
 
 void connect_setup() {
   WiFi.mode(WIFI_OFF);
@@ -23,6 +30,8 @@ void connect_setup() {
 
   delay(1000);
 }
+
+void update_time_loop() { update_success = timeClient.update(); }
 
 UPDATE_TIME_CONST connect_loop() {
   static uint8_t state = 0;
@@ -60,6 +69,9 @@ UPDATE_TIME_CONST connect_loop() {
 
     case 2: {
       Serial.println("Fetching time");
+      timeClient.begin();
+      timeClient.setTimeOffset(28800);
+
       conn_ival = 0;
       state = 0;
 
@@ -93,44 +105,17 @@ UPDATE_TIME_CONST connect_loop() {
 }
 
 bool connect_fetchAndParseJson() {
-  HTTPClient http;
+  update_time_loop();
 
-  http.begin(DATE_TIME_API_URL);
+  if (timeClient.isTimeSet()) {
+    const auto epoch = timeClient.getEpochTime();
 
-  int httpCode = http.GET();
+    epochToTime(epoch, adjustable_time);
 
-  if (httpCode <= 0 || httpCode != HTTP_CODE_OK) {
-    Serial.println("Failed to fetch data/time");
-    http.end();
-
-    return false;
+    return true;
   }
 
-  String payload = http.getString();
-
-  JsonDocument doc;
-  DeserializationError error = deserializeJson(doc, payload);
-
-  if (error) {
-    Serial.print("JSON parsing failed: ");
-
-    http.end();
-
-    return false;
-  }
-
-  JsonObject obj = doc.as<JsonObject>();
-
-  adjustable_time.hour = obj["hour"].as<const uint8_t>();
-  adjustable_time.minute = obj["minute"].as<const uint8_t>();
-  adjustable_time.second = obj["second"].as<const uint8_t>();
-  adjustable_time.day = obj["day"].as<const uint8_t>();
-  adjustable_time.month = obj["month"].as<const uint8_t>();
-  adjustable_time.year = obj["year"].as<const uint8_t>();
-
-  http.end();
-
-  return true;
+  return false;
 }
 
 void connect_update_time(_TIME_t* _cur_time) {
@@ -141,4 +126,53 @@ void connect_update_time(_TIME_t* _cur_time) {
   _cur_time->day = adjustable_time.day;
   _cur_time->month = adjustable_time.month;
   _cur_time->year = adjustable_time.year;
+}
+
+bool isLeapYear(uint16_t year) {
+  return ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0));
+}
+
+void epochToTime(uint32_t epoch, _TIME_t& t) {
+  const uint16_t daysInMonth[] = {31, 28, 31, 30, 31, 30,
+                                  31, 31, 30, 31, 30, 31};
+
+  // Time
+  t.second = epoch % 60;
+  epoch /= 60;
+  t.minute = epoch % 60;
+  epoch /= 60;
+  t.hour = epoch % 24;
+  epoch /= 24;  // now epoch = days since 1970-01-01
+
+  // Date
+  uint16_t year = 1970;
+  while (true) {
+    uint16_t daysInYear = isLeapYear(year) ? 366 : 365;
+    if (epoch >= daysInYear) {
+      epoch -= daysInYear;
+      year++;
+    } else {
+      break;
+    }
+  }
+
+  t.year = year % 100;  // store last two digits
+
+  uint8_t month = 0;
+  while (true) {
+    uint8_t dim = daysInMonth[month];
+    if (month == 1 && isLeapYear(year)) {
+      dim = 29;
+    }
+
+    if (epoch >= dim) {
+      epoch -= dim;
+      month++;
+    } else {
+      break;
+    }
+  }
+
+  t.month = month + 1;
+  t.day = epoch + 1;
 }

@@ -17,7 +17,10 @@ struct SWITCH_TIME_DATE {
   int DATE_ON = 2000;
 };
 
+// const char DATE_TIME_API_URL[] =
+//     "https://timeapi.io/api/time/current/zone?timeZone=Asia/Manila";
+
 const char DATE_TIME_API_URL[] =
-    "https://timeapi.io/api/time/current/zone?timeZone=Asia/Manila";
+    "https://api.api-ninjas.com/v1/timezone?timezone=Asia/Manila";
 
 #endif

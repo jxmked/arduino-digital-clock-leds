@@ -67,6 +67,8 @@ void setup() {
 void loop() {
   emit_refresh();
 
+  // update_time_loop();
+
   // Keep 5 mins difference from last update if the date is not set
   if (update_time_ival.marked(wifi_update_conf.KEEP_ON) ||
       (!is_date_set && (millis() - last_update >= (60 * 5 * 1000)))) {
